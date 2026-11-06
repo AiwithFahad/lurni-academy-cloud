@@ -41,7 +41,7 @@ if (is_post()) {
                     ->execute([$tid, $aid, $sid, post('content'), $filePath, $status]);
                 flash('success', 'Assignment submitted.' . ($status === 'late' ? ' It was marked late.' : ''));
             }
-            log_activity($pdo, 'submitted_assignment', 'Submitted assignment #' . $aid, $tid, $me['id']);
+            log_activity($pdo, 'Submitted assignment #' . $aid, $tid);
         }
     }
     redirect('/student/assignments.php');

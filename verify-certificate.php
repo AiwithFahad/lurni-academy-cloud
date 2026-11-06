@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 // Public certificate verification — anyone with a certificate code can
 // confirm it is genuine: /verify-certificate.php?code=LURNI-2026-XXXXXXXX

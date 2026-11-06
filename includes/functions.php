@@ -280,8 +280,18 @@ function apply_coupon(PDO $pdo, string $code, float $amount): ?array {
 }
 function record_coupon_redemption(PDO $pdo, int $couponId, ?int $userId, ?int $paymentId, float $discount): void {
     try {
-        $pdo->prepare('INSERT INTO coupon_redemptions(coupon_id,user_id,payment_id,discount_amount,created_at) VALUES(?,?,?,?,NOW())')
-            ->execute([$couponId, $userId, $paymentId, $discount]);
+        // coupon_redemptions has (coupon_id, tenant_id, payment_id) — no
+        // user_id/discount_amount columns; tenant comes from the payment row.
+        $tenantId = null;
+        if ($paymentId) {
+            $s = $pdo->prepare('SELECT tenant_id FROM payments WHERE id=?');
+            $s->execute([$paymentId]);
+            $tenantId = $s->fetchColumn() ?: null;
+        }
+        if ($tenantId) {
+            $pdo->prepare('INSERT INTO coupon_redemptions(coupon_id,tenant_id,payment_id,created_at) VALUES(?,?,?,NOW())')
+                ->execute([$couponId, (int)$tenantId, $paymentId]);
+        }
         $pdo->prepare('UPDATE coupons SET times_used=times_used+1 WHERE id=?')->execute([$couponId]);
     } catch (Throwable $ignored) {}
 }

@@ -32,7 +32,7 @@ if ($existing) {
 } else {
     $pdo->prepare("INSERT INTO enrollments(tenant_id,student_id,course_id,status,source) VALUES(?,?,?,'active','self')")
         ->execute([$tid, $sid, $courseId]);
-    log_activity($pdo, 'enrolled', 'Enrolled in course: ' . $course['title'], $tid, $me['id']);
+    log_activity($pdo, 'Enrolled in course: ' . $course['title'], $tid);
     flash('success', 'Enrolled! "' . $course['title'] . '" is now in My Learning.');
 }
 redirect('/student/course.php?id=' . $courseId);

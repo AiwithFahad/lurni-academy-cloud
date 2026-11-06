@@ -33,7 +33,18 @@ try {
     $statements = array_filter(array_map('trim', preg_split('/;\s*\R/', $sql) ?: []));
     $count = 0;
     foreach ($statements as $stmt) {
-        if ($stmt === '' || str_starts_with($stmt, '--')) continue;
+        // Strip leading blank/comment lines: chunks that merely OPEN with a
+        // "--" banner can still contain real SQL (previously such chunks were
+        // skipped wholesale, silently dropping whole tables and seed blocks).
+        $lines = preg_split('/\R/', $stmt) ?: [];
+        while ($lines && (trim($lines[0]) === '' || str_starts_with(ltrim($lines[0]), '--'))) {
+            array_shift($lines);
+        }
+        $stmt = trim(implode("\n", $lines));
+        if ($stmt === '') continue;
+        // The dump hardcodes "CREATE DATABASE lurni_academy_cloud; USE ...;" —
+        // skip those so the configured DB_NAME above is what gets populated.
+        if (preg_match('/^(CREATE\s+DATABASE|USE)\b/i', $stmt)) continue;
         $pdo->exec($stmt);
         $count++;
     }

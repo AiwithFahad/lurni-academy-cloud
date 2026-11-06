@@ -208,3 +208,106 @@ PHP/MySQL).
   build used the same verified-manual model for subscriptions).
 - The demo assignment/quiz seeds keep their original ids; the new seed
   rows reference them as documented in comments inside `database.sql`.
+
+---
+
+## Runtime verification (2026-11-06, live MariaDB 10.11.14 + PHP 8.5 built-in server)
+
+The upgrade above was originally verified by lint + schema cross-check only.
+It has now also been run end-to-end against a real database (scratch DB,
+demo seeds, cookie-jar HTTP tests asserting page content, not just status
+codes). A full crawl of ~65 public/admin/instructor/student/super-admin
+pages showed no fatals after the fixes below.
+
+**Environment note:** the app was configured purely via environment
+variables (no `.env` file was created); the scratch database and test user
+were dropped after testing and no test artifacts remain in the tree.
+
+### Flows tested — all passing
+- `install.php` into a fresh, non-default database name: 95 statements,
+  47 tables, all seeds present.
+- Public pages + course catalogue (only `approved` + `public` courses
+  listed); public certificate verification for a seeded code, an
+  auto-issued code, and a bogus code ("not found").
+- Login for all 4 roles landing on the correct trees; cross-role access
+  returns 403; anonymous access redirects to login; instructor course and
+  lesson pages show only that instructor's own courses (no leakage when
+  requesting another instructor's `course_id`).
+- `api/analytics.php`: real aggregates for admin (students, revenue,
+  enrollments series) and student (own progress/activity only), date-range
+  parameters accepted, anonymous → 401.
+- Purchase flow: course purchase with coupon WELCOME10 created a `pending`
+  payment ($39.00 − $3.90), an `unpaid` invoice ($35.10) and a `pending`
+  enrollment — nothing marked paid; admin verification then flipped
+  payment → `completed`, invoice → `paid`, enrollment → `active`.
+- Refund recording wrote a `payment_refunds` row (tenant-scoped).
+- Quiz engine: seeded quiz taken via `student/take-quiz.php` +
+  `api/quiz-submit.php` — all-correct attempt scored 7/7 (100%, passed);
+  a second attempt with a wrong single answer and 1-of-2 on a
+  multiple-answer question scored exactly 4/7 (57.14%, failed) with
+  proportional credit (1.00 of 2 points) and one `quiz_attempt_answers`
+  detail row per question.
+- Lesson progress: completing lessons moved enrollment progress
+  66.67 → 83.33 → 100%, flipped the enrollment to `completed` and
+  auto-issued a certificate that resolves on the public verify page.
+- Bookmarks toggle on/off, per-lesson notes save + read-back, discussion
+  thread GET (nested replies) + POST, tenant-scoped `api/search.php`.
+- Free-course self-enrollment via `api/enroll.php` and assignment
+  submission (update-in-place path) both complete without errors.
+
+### Bugs found by runtime testing and fixed
+1. `install.php` — the dump's hardcoded `CREATE DATABASE`/`USE
+   lurni_academy_cloud` statements defeated the configured `DB_NAME`
+   (install either failed on permissions or silently populated the wrong
+   database). The installer now skips those two statements.
+2. `install.php` — chunks of `database.sql` that merely *begin* with a
+   `--` banner comment were skipped wholesale, silently dropping the
+   `tenants`, `categories` and `lesson_bookmarks` tables (and breaking FK
+   creation). The installer now strips leading comment lines per chunk
+   and only skips chunks that are purely comments.
+3. `database.sql` — the `messages` seed listed 5 columns but 6 values
+   (stray trailing `NOW()`), aborting a fresh import at that row. Seed
+   fixed (`created_at` already defaults).
+4. `verify-certificate.php` — called `db()` before anything had loaded
+   `config/database.php` → fatal "Call to undefined function db()" on
+   every request. Added the missing require (same bootstrap the site
+   header uses).
+5. `includes/functions.php` — `record_coupon_redemption()` inserted
+   `user_id`/`discount_amount` columns that do not exist on
+   `coupon_redemptions` (schema is `coupon_id, tenant_id, payment_id`);
+   the SQL error was swallowed by its try/catch, so course-purchase
+   coupon redemptions were never recorded and `coupons.times_used` never
+   incremented (max-use caps never advanced). It now derives `tenant_id`
+   from the payment row — the same shape `super-admin/payments.php`
+   already used — and always increments `times_used`.
+6. `api/progress.php`, `api/enroll.php`, `student/assignments.php` —
+   three call sites used a nonexistent 5-argument
+   `log_activity($pdo, $action, $text, $tenantId, $userId)` shape; the
+   real signature is `log_activity(PDO, string $text, ?int $tenantId)`,
+   so each threw a TypeError *after* its DB write had committed (lesson
+   completion, free enrollment and assignment submission all appeared to
+   fail). All three now use the canonical call.
+
+### Observations (not changed)
+- Any recorded refund (even partial) flips the payment status to
+  `refunded` and blocks further refunds on that payment; refund totals
+  are still tracked accurately in `payment_refunds` and shown in the UI.
+  Left as-is — it reads as a deliberate one-refund-action design.
+- Seeded `enrollments.progress_percent` for the demo student (37.5%)
+  does not match the seed lesson data (3 of 6 lessons = 50%); the value
+  self-corrects on the student's next lesson completion because
+  `api/progress.php` recomputes from `lesson_progress`.
+
+### Files changed by this verification round
+- `install.php`
+- `database.sql`
+- `verify-certificate.php`
+- `includes/functions.php`
+- `api/progress.php`
+- `api/enroll.php`
+- `student/assignments.php`
+- `UPGRADE-SUMMARY.md` (this section)
+
+### Final checks
+- `php -l` on all 104 PHP files: **0 failures**.
+- `node --check` on `assets/js/app.js` and `vercel-demo/app.js`: pass.

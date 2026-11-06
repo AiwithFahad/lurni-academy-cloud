@@ -945,7 +945,7 @@ INSERT INTO notifications (tenant_id, user_id, title, body, link) VALUES
 (NULL, NULL, 'Platform update', 'Question banks and certificate verification are now live for all academies.', '');
 
 INSERT INTO messages (tenant_id, sender_id, receiver_id, subject, body) VALUES
-(1, 3, 5, 'Welcome to the PHP Bootcamp', 'Hi Ali — welcome aboard! Start with the roadmap lesson and reach out any time you get stuck.', NOW());
+(1, 3, 5, 'Welcome to the PHP Bootcamp', 'Hi Ali — welcome aboard! Start with the roadmap lesson and reach out any time you get stuck.');
 
 INSERT INTO activity_logs (tenant_id, user_id, description) VALUES
 (1, 2, 'Academy registered: Demo Academy on the Professional plan'),

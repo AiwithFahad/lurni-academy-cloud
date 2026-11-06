@@ -65,7 +65,7 @@ if ($completed) {
         $certIssued = true;
     }
 }
-log_activity($pdo, 'lesson_completed', 'Completed lesson: ' . $lesson['title'], $tid, (int)$me['id']);
+log_activity($pdo, 'Completed lesson: ' . $lesson['title'], $tid);
 $respond(true, $certIssued ? 'Course complete — your certificate has been issued!' : 'Lesson marked complete.', [
     'progress_percent' => $percent,
     'certificate_issued' => $certIssued,
