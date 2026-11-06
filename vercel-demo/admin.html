@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Dashboard — Lurni Academy Cloud</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="dashboard">
+  <div class="sidebar-backdrop"></div>
+  <aside class="sidebar">
+    <div class="brand"><span class="logo-mark">L</span><span class="logo-text text-white">Lurni<small>Academy Cloud</small></span></div>
+    <h6>Main</h6>
+    <a class="side-link active" href="admin.html"><i class="bi bi-grid"></i> Dashboard</a>
+    <a class="side-link" href="#"><i class="bi bi-people"></i> Students <span class="pill pill-blue ms-auto">1,248</span></a>
+    <a class="side-link" href="instructor.html"><i class="bi bi-person-video3"></i> Instructors</a>
+    <a class="side-link" href="#"><i class="bi bi-collection-play"></i> Courses</a>
+    <a class="side-link" href="#"><i class="bi bi-tags"></i> Categories</a>
+    <h6>Learning</h6>
+    <a class="side-link" href="#"><i class="bi bi-layers"></i> Modules</a>
+    <a class="side-link" href="#"><i class="bi bi-play-btn"></i> Lessons</a>
+    <a class="side-link" href="#"><i class="bi bi-patch-question"></i> Quizzes</a>
+    <a class="side-link" href="#"><i class="bi bi-journal-check"></i> Assignments</a>
+    <a class="side-link" href="#"><i class="bi bi-person-plus"></i> Enrollments</a>
+    <a class="side-link" href="#"><i class="bi bi-award"></i> Certificates</a>
+    <a class="side-link" href="#"><i class="bi bi-star"></i> Reviews</a>
+    <h6>Business</h6>
+    <a class="side-link" href="#"><i class="bi bi-credit-card"></i> Payments</a>
+    <a class="side-link" href="#"><i class="bi bi-bar-chart"></i> Reports</a>
+    <a class="side-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+    <h6>Portals</h6>
+    <a class="side-link" href="instructor.html"><i class="bi bi-person-video3"></i> Instructor Portal</a>
+    <a class="side-link" href="student.html"><i class="bi bi-mortarboard"></i> Student Portal</a>
+    <a class="side-link" href="index.html"><i class="bi bi-globe"></i> View Website</a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger" data-sidebar-toggle aria-label="Toggle sidebar"><i class="bi bi-list fs-5"></i></button>
+      <div class="search"><i class="bi bi-search text-muted"></i><input placeholder="Search students, courses, enrollments…"></div>
+      <a href="index.html" class="btn btn-outline-brand btn-sm d-none d-md-inline-flex">🌐 View website</a>
+      <span class="icon-btn"><i class="bi bi-bell"></i><span class="ping"></span></span>
+      <span class="icon-btn d-none d-sm-inline-flex"><i class="bi bi-envelope"></i></span>
+      <div class="d-flex align-items-center gap-2"><span class="av bg-p">AD</span><div class="d-none d-lg-block lh-1"><b class="d-block">Admin — Lurni HQ</b><small class="text-muted2">Super Admin</small></div></div>
+    </div>
+
+    <div class="content">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div><h3 class="mb-1">Welcome back, Admin 👋</h3><p class="text-muted2 mb-0">Here is what is happening across your academy today, Friday 6 Nov 2026.</p></div>
+        <div class="d-flex gap-2"><a href="instructor.html" class="btn btn-outline-brand btn-sm">Instructor view</a><a href="student.html" class="btn btn-brand btn-sm">+ New Course</a></div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-b"><i class="bi bi-people"></i></span><div><small class="text-muted2 fw-bold">TOTAL STUDENTS</small><br><b>1,248</b><br><span class="pill pill-green">↑ 12.4% this month</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-p"><i class="bi bi-person-video3"></i></span><div><small class="text-muted2 fw-bold">INSTRUCTORS</small><br><b>86</b><br><span class="pill pill-purple">↑ 6 new this month</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-t"><i class="bi bi-collection-play"></i></span><div><small class="text-muted2 fw-bold">ACTIVE COURSES</small><br><b>142</b><br><span class="pill pill-blue">18 in draft</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-a"><i class="bi bi-cash-stack"></i></span><div><small class="text-muted2 fw-bold">REVENUE (NOV)</small><br><b>$12,480</b><br><span class="pill pill-green">↑ 18.2% vs Oct</span></div></div></div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-7"><div class="panel"><div class="d-flex justify-content-between"><h5>Enrollments</h5><span class="badge-soft">Jan – Aug 2026</span></div><div style="height:280px"><canvas id="enrollmentChart"></canvas></div></div></div>
+        <div class="col-lg-5"><div class="panel"><div class="d-flex justify-content-between"><h5>Revenue</h5><span class="badge-soft badge-purple">Monthly $</span></div><div style="height:280px"><canvas id="revenueChart"></canvas></div></div></div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-7"><div class="panel">
+          <div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0">Recent Enrollments</h5><a href="#" class="small fw-bold">View all →</a></div>
+          <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+            <tr><td><span class="av av-sm bg-b me-2">AR</span><b>Ayesha Rahman</b></td><td>Python for AI</td><td>6 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td><span class="av av-sm bg-p me-2">BO</span><b>Bilal Omar</b></td><td>Web Dev Bootcamp</td><td>5 Nov 2026</td><td>$59</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td><span class="av av-sm bg-t me-2">NP</span><b>Nina Patel</b></td><td>UI/UX Masterclass</td><td>5 Nov 2026</td><td>$39</td><td><span class="pill pill-amber">Pending payment</span></td></tr>
+            <tr><td><span class="av av-sm bg-a me-2">DO</span><b>David Osei</b></td><td>Data Science</td><td>4 Nov 2026</td><td>$54</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr><td><span class="av av-sm bg-pk me-2">ML</span><b>Maria Lopez</b></td><td>Digital Marketing</td><td>4 Nov 2026</td><td>$29</td><td><span class="pill pill-blue">Trial</span></td></tr>
+            <tr><td><span class="av av-sm bg-g me-2">ZK</span><b>Zain Khan</b></td><td>Python for AI</td><td>3 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
+          </tbody></table></div>
+        </div></div>
+        <div class="col-lg-5">
+          <div class="panel mb-3"><h5>Top Courses</h5>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom"><div><b>🐍 Python for AI</b><br><small class="text-muted2">Dr. Sara Khan · 3,240 students</small></div><span class="pill pill-green">$8,420</span></div>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom"><div><b>💻 Web Dev Bootcamp</b><br><small class="text-muted2">Ayesha Rahman · 4,120 students</small></div><span class="pill pill-green">$7,960</span></div>
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom"><div><b>🎨 UI/UX Masterclass</b><br><small class="text-muted2">James Miller · 2,810 students</small></div><span class="pill pill-green">$5,310</span></div>
+            <div class="d-flex justify-content-between align-items-center py-2"><div><b>📊 Data Science</b><br><small class="text-muted2">David Osei · 2,260 students</small></div><span class="pill pill-green">$4,780</span></div>
+          </div>
+          <div class="panel"><h5>Recent Reviews</h5>
+            <div class="py-2 border-bottom"><span class="stars">★★★★★</span> <b>“Best LMS course I have taken.”</b><br><small class="text-muted2">Fatima H. on Python for AI · 2h ago</small></div>
+            <div class="py-2 border-bottom"><span class="stars">★★★★★</span> <b>“Clear lessons, great quizzes.”</b><br><small class="text-muted2">Omar S. on Web Dev Bootcamp · 5h ago</small></div>
+            <div class="py-2"><span class="stars">★★★★☆</span> <b>“Loved the projects, want more.”</b><br><small class="text-muted2">Lena K. on UI/UX Masterclass · Yesterday</small></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-center text-muted2 small mt-4">Lurni Academy Cloud — Admin demo with mock data · <a href="index.html">Back to website</a></p>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body></html>

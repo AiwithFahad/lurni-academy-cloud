@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lurni Academy Cloud — Learn Without Limits | LMS SaaS</title>
+<meta name="description" content="Lurni Academy Cloud is the all-in-one LMS for academies, schools and course creators. Courses, live classes, quizzes, certificates and payments in one cloud platform.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-lurni sticky-top"><div class="container">
+  <a class="navbar-brand d-flex align-items-center gap-2" href="index.html"><span class="logo-mark">L</span><span class="logo-text">Lurni<small>Academy Cloud</small></span></a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+  <div class="collapse navbar-collapse" id="nav">
+    <ul class="navbar-nav mx-auto">
+      <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+      <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+      <li class="nav-item"><a class="nav-link" href="#courses">Courses</a></li>
+      <li class="nav-item"><a class="nav-link" href="#instructors">Instructors</a></li>
+      <li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+      <li class="nav-item"><a class="nav-link" href="#blog">Blog</a></li>
+      <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+    </ul>
+    <div class="d-flex gap-2 mt-3 mt-lg-0"><a href="student.html" class="btn btn-outline-brand">Login</a><a href="#pricing" class="btn btn-brand">Start Free Trial</a></div>
+  </div>
+</div></nav>
+
+<!-- Hero -->
+<header class="hero" id="home"><div class="container"><div class="row align-items-center g-5">
+  <div class="col-lg-6">
+    <span class="eyebrow"><i class="bi bi-stars"></i> Trusted LMS for modern academies</span>
+    <h1 class="mt-3">Learn without limits. <span class="text-gradient">Teach without friction.</span></h1>
+    <p class="lead text-muted2 mt-3">One cloud platform for courses, live classes, quizzes, assignments, certificates and payments — built for academies, schools, bootcamps and independent creators.</p>
+    <form class="search-bar mt-4" onsubmit="return false">
+      <input id="courseSearch" type="search" placeholder="Search courses — try “Python”, “Design”, “Marketing”…">
+      <select aria-label="Category"><option>All categories</option><option>Development</option><option>Design</option><option>Data Science</option><option>Marketing</option><option>Business</option></select>
+      <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i> Search</button>
+    </form>
+    <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+      <div class="avatar-stack"><span class="av bg-b">AR</span><span class="av bg-p">SK</span><span class="av bg-t">JM</span><span class="av bg-a">NP</span><span class="av bg-d">+</span></div>
+      <div><div class="stars">★★★★★ <b class="text-dark">4.9/5</b></div><small class="text-muted2">from 12,400+ learners &amp; 860 academies</small></div>
+    </div>
+    <div class="d-flex gap-2 mt-4 flex-wrap"><a href="#demo" class="btn btn-brand"><i class="bi bi-play-circle"></i> Explore Live Demo</a><a href="#courses" class="btn btn-outline-brand">Browse Courses</a></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="mock">
+      <div class="mock-head"><span class="dot bg-danger"></span><span class="dot bg-warning"></span><span class="dot bg-success"></span><span class="ms-2 small text-muted2 fw-bold">app.lurni.academy/dashboard</span><span class="badge-soft ms-auto">LIVE PREVIEW</span></div>
+      <div class="p-3"><div class="row g-3">
+        <div class="col-4 d-none d-sm-block"><div class="mock-side"><div class="fw-bold text-white mb-3">🎓 Lurni</div><a class="active" href="admin.html">▦ Dashboard</a><a href="student.html">▣ My Learning</a><a href="admin.html">▶ Courses</a><a href="instructor.html">✓ Quizzes</a><a href="student.html">🏆 Certificates</a><a href="admin.html">⚙ Settings</a></div></div>
+        <div class="col-12 col-sm-8">
+          <div class="d-flex justify-content-between align-items-center"><div><small class="text-muted2">Welcome back,</small><h5 class="mb-0">Ayesha Rahman 👋</h5></div><span class="av bg-p">AR</span></div>
+          <div class="row g-2 mt-2">
+            <div class="col-6"><div class="mini-stat"><small class="text-muted2">Courses in progress</small><br><b>6</b> <span class="pill pill-green">+2 this week</span></div></div>
+            <div class="col-6"><div class="mini-stat"><small class="text-muted2">Learning streak</small><br><b>18 days</b> <span class="pill pill-amber">🔥 Keep going</span></div></div>
+            <div class="col-12"><div class="mini-stat"><div class="d-flex justify-content-between"><b class="fs-6">Python for AI — Module 7</b><span class="text-gradient fw-bold">78%</span></div><div class="progress mt-2"><div class="progress-bar" style="width:78%"></div></div><small class="text-muted2">Next: Neural Networks · Quiz due Friday</small></div></div>
+            <div class="col-6"><div class="mini-stat text-center"><div style="font-size:1.6rem">🏆</div><b class="fs-6">12 Certificates</b></div></div>
+            <div class="col-6"><div class="mini-stat text-center"><div style="font-size:1.6rem">⭐</div><b class="fs-6">4.9 Avg. Grade</b></div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div></div></header>
+
+<!-- Trusted strip -->
+<section class="py-4 bg-white border-bottom"><div class="container"><p class="text-center text-muted2 fw-bold small text-uppercase mb-3" style="letter-spacing:.12em">Powering learning at</p><div class="row logo-strip g-3"><div class="col-6 col-md-4 col-lg-2">🎓 Oxford Online</div><div class="col-6 col-md-4 col-lg-2">🏛 TechUniversity</div><div class="col-6 col-md-4 col-lg-2">📚 EduGlobal</div><div class="col-6 col-md-4 col-lg-2">🎓 Stanford Prep</div><div class="col-6 col-md-4 col-lg-2">🏫 Cambridge Hub</div><div class="col-6 col-md-4 col-lg-2">🌐 MIT OpenLearn</div></div></div></section>
+
+<!-- Categories -->
+<section class="section" id="features"><div class="container">
+  <div class="text-center mx-auto" style="max-width:640px"><span class="eyebrow">Course Categories</span><h2 class="mt-3">Explore learning paths for <span class="text-gradient">every goal</span></h2><p class="text-muted2">142 expert-led courses across 8 categories, with structured modules, quizzes and verified certificates.</p></div>
+  <div class="row g-3 mt-4">
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-b"><i class="bi bi-code-slash"></i></div><h5>Development</h5><p class="text-muted2 mb-0">38 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-p"><i class="bi bi-palette"></i></div><h5>Design &amp; UI/UX</h5><p class="text-muted2 mb-0">24 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-t"><i class="bi bi-bar-chart"></i></div><h5>Data Science &amp; AI</h5><p class="text-muted2 mb-0">21 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-a"><i class="bi bi-megaphone"></i></div><h5>Marketing</h5><p class="text-muted2 mb-0">18 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-pk"><i class="bi bi-briefcase"></i></div><h5>Business</h5><p class="text-muted2 mb-0">16 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-g"><i class="bi bi-translate"></i></div><h5>Languages</h5><p class="text-muted2 mb-0">11 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon" style="background:linear-gradient(135deg,#06B6D4,#2563EB)"><i class="bi bi-heart-pulse"></i></div><h5>Health &amp; Fitness</h5><p class="text-muted2 mb-0">8 courses</p></div></div>
+    <div class="col-6 col-md-4 col-lg-3"><div class="cat-card"><div class="cat-icon bg-d"><i class="bi bi-music-note-beamed"></i></div><h5>Music &amp; Arts</h5><p class="text-muted2 mb-0">6 courses</p></div></div>
+  </div>
+
+  <!-- Platform features -->
+  <div class="row g-3 mt-5">
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="cat-icon bg-b mb-3" style="margin:0"><i class="bi bi-collection-play"></i></div><h5>Course Builder</h5><p class="text-muted2 mb-0">Drag-and-drop modules, video lessons, PDFs and drip scheduling — no code needed.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="cat-icon bg-p mb-3" style="margin:0"><i class="bi bi-patch-question"></i></div><h5>Quizzes &amp; Grading</h5><p class="text-muted2 mb-0">Auto-graded quizzes, assignment rubrics and instant feedback for every learner.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="cat-icon bg-t mb-3" style="margin:0"><i class="bi bi-award"></i></div><h5>Certificates</h5><p class="text-muted2 mb-0">Beautiful, verifiable certificates issued automatically on course completion.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="cat-icon bg-a mb-3" style="margin:0"><i class="bi bi-credit-card"></i></div><h5>Payments &amp; Plans</h5><p class="text-muted2 mb-0">Subscriptions, coupons and one-off sales with revenue reports built in.</p></div></div>
+  </div>
+</div></section>
+
+<!-- Featured Courses -->
+<section class="section bg-soft pt-5" id="courses"><div class="container">
+  <div class="d-flex justify-content-between align-items-end flex-wrap gap-3"><div><span class="eyebrow">Featured Courses</span><h2 class="mt-3 mb-1">Most loved by <span class="text-gradient">learners this month</span></h2><p class="text-muted2 mb-0">Type in the hero search to filter these courses live.</p></div><a href="student.html" class="btn btn-outline-brand">View all 142 courses →</a></div>
+  <div class="row g-4 mt-3" id="courseGrid">
+    <!-- Course cards generated pattern -->
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="Python for AI & Machine Learning"><div class="course-thumb" style="background:linear-gradient(135deg,#2563EB,#7C3AED)"><span class="level">Beginner · 24 lessons</span><span style="font-size:3.2rem">🐍</span><span class="play">▶</span><span class="fw-bold">Python for AI</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft">Data Science &amp; AI</span><span class="stars">★★★★★ 4.9</span></div><h5 class="mt-2">Python for AI &amp; Machine Learning</h5><p class="text-muted2 small">From Python basics to neural networks, with 9 hands-on projects.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-b">SK</span><small class="fw-bold">Dr. Sara Khan</small><small class="text-muted2 ms-auto">👥 3,240</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$49<s>$89</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="UI UX Design Masterclass Figma"><div class="course-thumb" style="background:linear-gradient(135deg,#EC4899,#7C3AED)"><span class="level">All levels · 32 lessons</span><span style="font-size:3.2rem">🎨</span><span class="play">▶</span><span class="fw-bold">UI/UX Masterclass</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft badge-purple">Design</span><span class="stars">★★★★★ 4.8</span></div><h5 class="mt-2">UI/UX Design Masterclass — Figma</h5><p class="text-muted2 small">Research, wireframes, design systems and a portfolio-ready capstone.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-p">JM</span><small class="fw-bold">James Miller</small><small class="text-muted2 ms-auto">👥 2,810</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$39<s>$79</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="Full Stack Web Development Bootcamp"><div class="course-thumb" style="background:linear-gradient(135deg,#0EA5E9,#2563EB)"><span class="level">Intermediate · 48 lessons</span><span style="font-size:3.2rem">💻</span><span class="play">▶</span><span class="fw-bold">Web Development</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft">Development</span><span class="stars">★★★★★ 5.0</span></div><h5 class="mt-2">Full-Stack Web Development Bootcamp</h5><p class="text-muted2 small">HTML, CSS, JavaScript, PHP &amp; MySQL — build and deploy 6 real apps.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-t">AR</span><small class="fw-bold">Ayesha Rahman</small><small class="text-muted2 ms-auto">👥 4,120</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$59<s>$119</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="Digital Marketing & SEO Growth"><div class="course-thumb" style="background:linear-gradient(135deg,#F59E0B,#EF4444)"><span class="level">Beginner · 20 lessons</span><span style="font-size:3.2rem">📈</span><span class="play">▶</span><span class="fw-bold">Digital Marketing</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft badge-amber">Marketing</span><span class="stars">★★★★☆ 4.7</span></div><h5 class="mt-2">Digital Marketing &amp; SEO Growth</h5><p class="text-muted2 small">SEO, ads, funnels and analytics — grow any business online.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-a">NP</span><small class="fw-bold">Nina Patel</small><small class="text-muted2 ms-auto">👥 1,940</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$29<s>$59</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="Data Science with Python Pandas"><div class="course-thumb" style="background:linear-gradient(135deg,#10B981,#0EA5E9)"><span class="level">Advanced · 36 lessons</span><span style="font-size:3.2rem">📊</span><span class="play">▶</span><span class="fw-bold">Data Science</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft badge-green">Data Science</span><span class="stars">★★★★★ 4.9</span></div><h5 class="mt-2">Data Science with Python &amp; Pandas</h5><p class="text-muted2 small">Clean, analyse and visualise real datasets; build ML models that ship.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-g">DO</span><small class="fw-bold">David Osei</small><small class="text-muted2 ms-auto">👥 2,260</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$54<s>$99</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+    <div class="col-md-6 col-lg-4"><article class="course-card" data-course-title="Business Leadership & Entrepreneurship"><div class="course-thumb" style="background:linear-gradient(135deg,#334155,#7C3AED)"><span class="level">All levels · 18 lessons</span><span style="font-size:3.2rem">🚀</span><span class="play">▶</span><span class="fw-bold">Entrepreneurship</span></div><div class="course-body"><div class="d-flex justify-content-between"><span class="badge-soft badge-purple">Business</span><span class="stars">★★★★★ 4.8</span></div><h5 class="mt-2">Business Leadership &amp; Entrepreneurship</h5><p class="text-muted2 small">Validate ideas, lead teams and launch products people pay for.</p><div class="d-flex align-items-center gap-2"><span class="av av-sm bg-d">ML</span><small class="fw-bold">Maria Lopez</small><small class="text-muted2 ms-auto">👥 1,530</small></div><hr><div class="d-flex justify-content-between align-items-center"><span class="price">$44<s>$84</s></span><a href="student.html" class="btn btn-brand btn-sm px-3">Enroll Now</a></div></div></article></div>
+  </div>
+</div></section>
+
+<!-- Stats -->
+<section class="section-sm" style="background:var(--grad)"><div class="container"><div class="row text-center text-white g-4">
+  <div class="col-6 col-lg-3"><div class="stat-num" data-count="24800" data-suffix="+">0</div><p class="mb-0 opacity-75 fw-semibold">Active Students</p></div>
+  <div class="col-6 col-lg-3"><div class="stat-num" data-count="142" data-suffix="">0</div><p class="mb-0 opacity-75 fw-semibold">Expert Courses</p></div>
+  <div class="col-6 col-lg-3"><div class="stat-num" data-count="860" data-suffix="+">0</div><p class="mb-0 opacity-75 fw-semibold">Academies &amp; Schools</p></div>
+  <div class="col-6 col-lg-3"><div class="stat-num" data-count="96" data-suffix="%">0</div><p class="mb-0 opacity-75 fw-semibold">Completion Rate</p></div>
+</div></div></section>
+
+<!-- How it works -->
+<section class="section"><div class="container">
+  <div class="text-center mx-auto" style="max-width:620px"><span class="eyebrow">How It Works</span><h2 class="mt-3">From signup to certificate in <span class="text-gradient">4 simple steps</span></h2></div>
+  <div class="row g-4 mt-4 text-center">
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="step-num">1</div><h5>Create your account</h5><p class="text-muted2 mb-0">Start free in under a minute — as a student, instructor or whole academy.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="step-num">2</div><h5>Enroll or build a course</h5><p class="text-muted2 mb-0">Learners pick a path; creators build modules with video, quizzes and files.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="step-num">3</div><h5>Learn &amp; get graded</h5><p class="text-muted2 mb-0">Watch lessons, take auto-graded quizzes and submit assignments for feedback.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 h-100"><div class="step-num">4</div><h5>Earn your certificate</h5><p class="text-muted2 mb-0">Finish the course and receive a verifiable certificate to share anywhere.</p></div></div>
+  </div>
+
+  <!-- Benefits -->
+  <div class="row g-4 mt-5 align-items-stretch">
+    <div class="col-lg-4"><div class="benefit-card"><div class="benefit-img" style="background:linear-gradient(135deg,#2563EB,#7C3AED)">🎥</div><div class="p-4"><h5>Learn at your own pace</h5><p class="text-muted2 mb-0">Lifetime access, mobile-friendly lessons, offline downloads and bite-size modules that fit busy schedules.</p></div></div></div>
+    <div class="col-lg-4"><div class="benefit-card"><div class="benefit-img" style="background:linear-gradient(135deg,#0EA5E9,#10B981)">👩‍🏫</div><div class="p-4"><h5>Feedback from real experts</h5><p class="text-muted2 mb-0">Graded assignments, instructor Q&amp;A and community discussions — you never learn alone on Lurni.</p></div></div></div>
+    <div class="col-lg-4"><div class="benefit-card"><div class="benefit-img" style="background:linear-gradient(135deg,#F59E0B,#EC4899)">💼</div><div class="p-4"><h5>Skills that get you hired</h5><p class="text-muted2 mb-0">Portfolio projects, verifiable certificates and career tracks designed with hiring partners.</p></div></div></div>
+  </div>
+</div></section>
+
+<!-- Instructors -->
+<section class="section bg-soft" id="instructors"><div class="container">
+  <div class="text-center mx-auto" style="max-width:620px"><span class="eyebrow">Meet Your Instructors</span><h2 class="mt-3">Learn from people who <span class="text-gradient">do the work</span></h2></div>
+  <div class="row g-4 mt-4">
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 text-center h-100"><span class="av av-lg bg-b">SK</span><h5 class="mt-3 mb-1">Dr. Sara Khan</h5><p class="text-muted2 small">AI &amp; Data Science · 12 courses</p><div class="stars">★★★★★ 4.9</div><p class="small text-muted2 mt-2 mb-0">Ex-Google ML lead. 48k students taught.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 text-center h-100"><span class="av av-lg bg-p">JM</span><h5 class="mt-3 mb-1">James Miller</h5><p class="text-muted2 small">Product Design · 9 courses</p><div class="stars">★★★★★ 4.8</div><p class="small text-muted2 mt-2 mb-0">Design systems lead for fintech brands.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 text-center h-100"><span class="av av-lg bg-t">AR</span><h5 class="mt-3 mb-1">Ayesha Rahman</h5><p class="text-muted2 small">Web Development · 14 courses</p><div class="stars">★★★★★ 5.0</div><p class="small text-muted2 mt-2 mb-0">Full-stack engineer &amp; bootcamp mentor.</p></div></div>
+    <div class="col-md-6 col-lg-3"><div class="card-soft p-4 text-center h-100"><span class="av av-lg bg-a">DO</span><h5 class="mt-3 mb-1">David Osei</h5><p class="text-muted2 small">Data Analytics · 8 courses</p><div class="stars">★★★★★ 4.9</div><p class="small text-muted2 mt-2 mb-0">Analytics consultant for global NGOs.</p></div></div>
+  </div>
+
+  <!-- Testimonials -->
+  <div class="row g-4 mt-5">
+    <div class="col-lg-4"><div class="testi"><div class="stars">★★★★★</div><p class="mt-2">“We moved our entire academy onto Lurni in one weekend. Enrollments, quizzes and certificates just work — our completion rate jumped from 61% to 94%.”</p><div class="d-flex gap-2 align-items-center"><span class="av bg-p">FH</span><div><b>Fatima Hassan</b><br><small class="text-muted2">Director, EduGlobal Academy</small></div></div></div></div>
+    <div class="col-lg-4"><div class="testi"><div class="stars">★★★★★</div><p class="mt-2">“As an instructor, the grading queue and performance charts save me hours every week. I finally spend my time teaching, not doing admin.”</p><div class="d-flex gap-2 align-items-center"><span class="av bg-b">JM</span><div><b>James Miller</b><br><small class="text-muted2">Instructor, UI/UX Masterclass</small></div></div></div></div>
+    <div class="col-lg-4"><div class="testi"><div class="stars">★★★★★</div><p class="mt-2">“I finished the Python for AI course while working full-time. The streaks, quizzes and certificate kept me going — and helped me land my first data role.”</p><div class="d-flex gap-2 align-items-center"><span class="av bg-t">BO</span><div><b>Bilal Omar</b><br><small class="text-muted2">Student, now Data Analyst</small></div></div></div></div>
+  </div>
+</div></section>
+
+<!-- Course preview + Dashboard preview -->
+<section class="section"><div class="container"><div class="row g-5 align-items-center">
+  <div class="col-lg-6"><span class="eyebrow">Course Preview</span><h2 class="mt-3">See exactly what a lesson <span class="text-gradient">feels like</span></h2>
+    <ul class="list-unstyled mt-3" style="line-height:2.1">
+      <li>✅ <b>Module 1:</b> Getting started &amp; setup <span class="pill pill-green ms-2">Free preview</span></li>
+      <li>✅ <b>Module 2:</b> Core concepts with live examples</li>
+      <li>✅ <b>Module 3:</b> Hands-on project + auto-graded quiz</li>
+      <li>🔒 <b>Module 4–9:</b> Advanced topics, assignments &amp; capstone</li>
+    </ul>
+    <a href="student.html" class="btn btn-brand mt-2">Watch Free Preview →</a>
+  </div>
+  <div class="col-lg-6"><div class="mock"><div class="course-thumb" style="height:230px;background:linear-gradient(135deg,#1E293B,#7C3AED)"><span class="play" style="width:68px;height:68px;font-size:1.6rem">▶</span><span class="fw-bold fs-5">Lesson 7.2 — Neural Networks, Explained Simply</span><span class="badge-soft" style="position:absolute;top:12px;right:12px">12:48</span></div><div class="p-3"><div class="d-flex justify-content-between small fw-bold"><span>Course progress</span><span class="text-gradient">78%</span></div><div class="progress mt-2"><div class="progress-bar" style="width:78%"></div></div><div class="d-flex gap-2 mt-3 flex-wrap"><span class="pill pill-blue">📝 Notes</span><span class="pill pill-purple">💬 24 comments</span><span class="pill pill-amber">📎 Resources (3)</span><span class="pill pill-green">✓ Quiz passed · 92%</span></div></div></div></div>
+</div>
+
+<!-- Live Demo -->
+<div class="mt-5 p-4 p-lg-5 rounded-4" id="demo" style="background:var(--grad-soft);border:1px solid var(--border)">
+  <div class="text-center"><span class="eyebrow">Live Demo</span><h2 class="mt-3">Try every portal — <span class="text-gradient">no signup needed</span></h2><p class="text-muted2">Static demo dashboards with realistic mock data. Pick a role:</p></div>
+  <div class="row g-3 mt-3">
+    <div class="col-md-4"><a href="admin.html" class="card-soft p-4 d-block text-center h-100"><div style="font-size:2.2rem">🛠</div><h5 class="mt-2">Academy Admin</h5><p class="text-muted2 small mb-0">Students, courses, payments, reports &amp; certificates.</p><span class="btn btn-brand btn-sm mt-3">Open Admin →</span></a></div>
+    <div class="col-md-4"><a href="instructor.html" class="card-soft p-4 d-block text-center h-100"><div style="font-size:2.2rem">👩‍🏫</div><h5 class="mt-2">Instructor Portal</h5><p class="text-muted2 small mb-0">My courses, grading queue, earnings &amp; performance.</p><span class="btn btn-brand btn-sm mt-3">Open Instructor →</span></a></div>
+    <div class="col-md-4"><a href="student.html" class="card-soft p-4 d-block text-center h-100"><div style="font-size:2.2rem">🎓</div><h5 class="mt-2">Student Portal</h5><p class="text-muted2 small mb-0">Continue learning, assignments, grades &amp; certificates.</p><span class="btn btn-brand btn-sm mt-3">Open Student →</span></a></div>
+  </div>
+</div>
+</div></section>
+
+<!-- Pricing -->
+<section class="section bg-soft" id="pricing"><div class="container">
+  <div class="text-center mx-auto" style="max-width:640px"><span class="eyebrow">Pricing</span><h2 class="mt-3">Simple pricing that <span class="text-gradient">scales with you</span></h2><p class="text-muted2">For learners and academies. Toggle to yearly and save 20%.</p>
+    <div class="pricing-toggle mt-2"><button class="active" data-billing="monthly">Monthly</button><button data-billing="yearly">Yearly −20%</button></div>
+  </div>
+  <div class="row g-4 mt-4 align-items-stretch">
+    <div class="col-md-6 col-xl"><div class="price-card"><h5>Free</h5><p class="text-muted2 small">For curious learners</p><div><span class="amount">$<span data-monthly="0" data-yearly="0">0</span></span></div><p class="billing-note text-muted2 small">free forever</p><ul><li>3 courses</li><li>Community access</li><li>Mobile app</li><li>Course previews</li></ul><a href="student.html" class="btn btn-outline-brand w-100">Start Free</a></div></div>
+    <div class="col-md-6 col-xl"><div class="price-card"><h5>Starter</h5><p class="text-muted2 small">For solo creators</p><div><span class="amount">$<span data-monthly="19" data-yearly="15">19</span></span></div><p class="billing-note text-muted2 small">per month, billed monthly</p><ul><li>10 courses</li><li>100 students</li><li>Quizzes &amp; certificates</li><li>Basic reports</li></ul><a href="admin.html" class="btn btn-outline-brand w-100">Start Trial</a></div></div>
+    <div class="col-md-6 col-xl"><div class="price-card featured"><span class="badge-soft" style="position:absolute;top:-13px;right:18px;background:var(--grad);color:#fff">MOST POPULAR</span><h5>Professional</h5><p class="text-muted2 small">For growing academies</p><div><span class="amount">$<span data-monthly="49" data-yearly="39">49</span></span></div><p class="billing-note text-muted2 small">per month, billed monthly</p><ul><li>Unlimited courses</li><li>2,000 students</li><li>Assignments &amp; grading</li><li>Payments &amp; coupons</li><li>Advanced reports</li></ul><a href="admin.html" class="btn btn-brand w-100">Start Trial</a></div></div>
+    <div class="col-md-6 col-xl"><div class="price-card"><h5>Business</h5><p class="text-muted2 small">For schools &amp; teams</p><div><span class="amount">$<span data-monthly="99" data-yearly="79">99</span></span></div><p class="billing-note text-muted2 small">per month, billed monthly</p><ul><li>Everything in Pro</li><li>10,000 students</li><li>Multi-instructor roles</li><li>Custom branding</li><li>Priority support</li></ul><a href="admin.html" class="btn btn-outline-brand w-100">Start Trial</a></div></div>
+    <div class="col-md-6 col-xl"><div class="price-card"><h5>Enterprise</h5><p class="text-muted2 small">For institutions</p><div><span class="amount">Custom</span></div><p class="text-muted2 small">tailored annual agreement</p><ul><li>Unlimited everything</li><li>SSO &amp; API access</li><li>Dedicated manager</li><li>SLA &amp; onboarding</li></ul><a href="#contact" class="btn btn-outline-brand w-100">Talk to Sales</a></div></div>
+  </div>
+
+  <!-- Success stories -->
+  <div class="row g-4 mt-5">
+    <div class="col-lg-6"><div class="testi d-flex gap-3"><span style="font-size:2.4rem">🏫</span><div><h5>EduGlobal Academy — 3× enrollments in 6 months</h5><p class="mb-1">After switching to Lurni, EduGlobal launched 24 new courses, automated certificates and grew from 400 to 1,250 active students without hiring extra admin staff.</p><span class="pill pill-green">+212% enrollments</span> <span class="pill pill-blue">94% completion</span></div></div></div>
+    <div class="col-lg-6"><div class="testi d-flex gap-3"><span style="font-size:2.4rem">💡</span><div><h5>CodeCamp PK — a bootcamp run by 2 people</h5><p class="mb-1">Two instructors run a 600-student coding bootcamp on Lurni: auto-graded quizzes, assignment rubrics and payment plans handle the operations for them.</p><span class="pill pill-purple">$12,480 monthly revenue</span> <span class="pill pill-amber">4.9★ avg. rating</span></div></div></div>
+  </div>
+</div></section>
+
+<!-- Blog -->
+<section class="section" id="blog"><div class="container">
+  <div class="text-center"><span class="eyebrow">From the Blog</span><h2 class="mt-3">Ideas for <span class="text-gradient">better teaching</span></h2></div>
+  <div class="row g-4 mt-4">
+    <div class="col-md-4"><article class="blog-card"><div class="blog-img" style="background:linear-gradient(135deg,#2563EB,#7C3AED)">🤖</div><div class="p-4"><span class="badge-soft">AI in Education</span><h5 class="mt-2">How AI grading gives instructors their evenings back</h5><p class="text-muted2 small">Auto-graded quizzes are only the start. Here is how smart rubrics cut grading time by 70%.</p><small class="text-muted2">Nov 2, 2026 · 6 min read</small></div></article></div>
+    <div class="col-md-4"><article class="blog-card"><div class="blog-img" style="background:linear-gradient(135deg,#0EA5E9,#10B981)">📈</div><div class="p-4"><span class="badge-soft badge-green">Growth</span><h5 class="mt-2">5 pricing pages lessons from top course creators</h5><p class="text-muted2 small">What 860 academies taught us about trials, yearly discounts and the perfect plan ladder.</p><small class="text-muted2">Oct 28, 2026 · 8 min read</small></div></article></div>
+    <div class="col-md-4"><article class="blog-card"><div class="blog-img" style="background:linear-gradient(135deg,#F59E0B,#EC4899)">🎓</div><div class="p-4"><span class="badge-soft badge-amber">Student Success</span><h5 class="mt-2">The completion-rate playbook: streaks, nudges &amp; cohorts</h5><p class="text-muted2 small">Why Lurni learners finish at 96% — and how to copy the system in your own academy.</p><small class="text-muted2">Oct 21, 2026 · 5 min read</small></div></article></div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="row justify-content-center mt-5"><div class="col-lg-8">
+    <h3 class="text-center mb-4">Frequently asked questions</h3>
+    <div class="accordion" id="faq">
+      <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#f1">Can I try Lurni before paying?</button></h2><div id="f1" class="accordion-collapse collapse show" data-bs-parent="#faq"><div class="accordion-body text-muted2">Yes — every paid plan starts with a 14-day free trial, and the Free plan is free forever for learners. No card required.</div></div></div>
+      <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f2">Can I sell courses and accept payments?</button></h2><div id="f2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body text-muted2">Yes. Professional and above include course sales, subscriptions, coupons and revenue reports, with payouts to your bank account.</div></div></div>
+      <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f3">Are certificates verifiable?</button></h2><div id="f3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body text-muted2">Every certificate carries a unique verification ID and public verification page, so employers can confirm authenticity in seconds.</div></div></div>
+      <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f4">Can I migrate from another LMS?</button></h2><div id="f4" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body text-muted2">Our team migrates courses, students and enrollments free on Business and Enterprise plans — most academies are live within a weekend.</div></div></div>
+      <div class="accordion-item"><h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f5">Does Lurni work on mobile?</button></h2><div id="f5" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body text-muted2">Fully. Dashboards, lessons, quizzes and grading are responsive on phones and tablets, with offline lesson downloads on paid plans.</div></div></div>
+    </div>
+  </div></div>
+
+  <!-- Newsletter -->
+  <div class="newsletter mt-5"><div class="row align-items-center g-3"><div class="col-lg-7"><h3 class="text-white mb-1">Get one practical teaching tip every Tuesday 📬</h3><p class="mb-0 opacity-75">Join 18,000 educators and creators. No spam, unsubscribe anytime.</p></div><div class="col-lg-5"><form class="d-flex gap-2 flex-column flex-sm-row" data-demo-form><input type="email" required placeholder="you@academy.com" aria-label="Email"><button class="btn btn-white text-nowrap" type="submit">Subscribe</button></form></div></div></div>
+</div></section>
+
+<!-- Contact strip + Footer -->
+<section class="py-4 bg-white border-top" id="contact"><div class="container"><div class="row g-3 text-center">
+  <div class="col-md-4"><b>📧 hello@lurni.academy</b><br><small class="text-muted2">Replies within one business day</small></div>
+  <div class="col-md-4"><b>💬 Live chat, Mon–Sat</b><br><small class="text-muted2">9am–9pm PKT inside every dashboard</small></div>
+  <div class="col-md-4"><b>📞 +92 300 123 4567</b><br><small class="text-muted2">Sales &amp; Enterprise enquiries</small></div>
+</div></div></section>
+<footer><div class="container"><div class="row g-4">
+  <div class="col-lg-4"><div class="d-flex align-items-center gap-2"><span class="logo-mark">L</span><span class="logo-text text-white">Lurni<small>Academy Cloud</small></span></div><p class="mt-3 small">The all-in-one LMS cloud for academies, schools and creators — courses, quizzes, certificates and payments in one place.</p><div class="d-flex gap-2 fs-5"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">◎</a></div></div>
+  <div class="col-6 col-lg-2"><h6>Platform</h6><ul class="list-unstyled small" style="line-height:2"><li><a href="#features">Features</a></li><li><a href="#courses">Courses</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#demo">Live Demo</a></li></ul></div>
+  <div class="col-6 col-lg-2"><h6>Portals</h6><ul class="list-unstyled small" style="line-height:2"><li><a href="admin.html">Admin</a></li><li><a href="instructor.html">Instructor</a></li><li><a href="student.html">Student</a></li></ul></div>
+  <div class="col-6 col-lg-2"><h6>Company</h6><ul class="list-unstyled small" style="line-height:2"><li><a href="#blog">Blog</a></li><li><a href="#instructors">Instructors</a></li><li><a href="#contact">Contact</a></li></ul></div>
+  <div class="col-6 col-lg-2"><h6>Support</h6><ul class="list-unstyled small" style="line-height:2"><li><a href="#faq">FAQ</a></li><li><a href="#contact">Help Centre</a></li><li><a href="#pricing">Free Trial</a></li></ul></div>
+</div><hr style="border-color:rgba(255,255,255,.12)"><div class="d-flex justify-content-between flex-wrap gap-2 small"><span>© 2026 Lurni Academy Cloud. All rights reserved.</span><span>Privacy · Terms · Cookies</span></div></div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body></html>

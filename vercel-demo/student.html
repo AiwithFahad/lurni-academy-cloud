@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Portal — Lurni Academy Cloud</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<div class="dashboard">
+  <div class="sidebar-backdrop"></div>
+  <aside class="sidebar">
+    <div class="brand"><span class="logo-mark">L</span><span class="logo-text text-white">Lurni<small>Student</small></span></div>
+    <h6>Learn</h6>
+    <a class="side-link active" href="student.html"><i class="bi bi-grid"></i> Dashboard</a>
+    <a class="side-link" href="#"><i class="bi bi-collection-play"></i> My Learning</a>
+    <a class="side-link" href="index.html#courses"><i class="bi bi-compass"></i> Browse Courses</a>
+    <a class="side-link" href="#"><i class="bi bi-journal-check"></i> Assignments <span class="pill pill-amber ms-auto">3 due</span></a>
+    <a class="side-link" href="#"><i class="bi bi-patch-question"></i> Quizzes</a>
+    <a class="side-link" href="#"><i class="bi bi-graph-up"></i> Progress</a>
+    <a class="side-link" href="#"><i class="bi bi-clipboard-data"></i> Grades</a>
+    <a class="side-link" href="#"><i class="bi bi-award"></i> Certificates</a>
+    <h6>Account</h6>
+    <a class="side-link" href="#"><i class="bi bi-chat-dots"></i> Messages <span class="pill pill-blue ms-auto">2</span></a>
+    <a class="side-link" href="#"><i class="bi bi-gear"></i> Settings</a>
+    <h6>Portals</h6>
+    <a class="side-link" href="admin.html"><i class="bi bi-shield-lock"></i> Admin Portal</a>
+    <a class="side-link" href="instructor.html"><i class="bi bi-person-video3"></i> Instructor Portal</a>
+    <a class="side-link" href="index.html"><i class="bi bi-globe"></i> View Website</a>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger" data-sidebar-toggle aria-label="Toggle sidebar"><i class="bi bi-list fs-5"></i></button>
+      <div class="search"><i class="bi bi-search text-muted"></i><input placeholder="Search courses, lessons…"></div>
+      <a href="index.html" class="btn btn-outline-brand btn-sm d-none d-md-inline-flex">🌐 View website</a>
+      <span class="icon-btn"><i class="bi bi-bell"></i><span class="ping"></span></span>
+      <div class="d-flex align-items-center gap-2"><span class="av bg-b">AR</span><div class="d-none d-lg-block lh-1"><b class="d-block">Ayesha Rahman</b><small class="text-muted2">Student · Pro Plan</small></div></div>
+    </div>
+
+    <div class="content">
+      <div class="p-4 rounded-4 mb-4 text-white" style="background:var(--grad)">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div><h3 class="text-white mb-1">Welcome back, Ayesha 👋</h3><p class="mb-0 opacity-75">You are on an 18-day streak. Finish Module 7 today to keep it alive!</p></div>
+          <div class="d-flex gap-3 text-center"><div><b class="fs-4 d-block">18 🔥</b><small class="opacity-75">Day streak</small></div><div><b class="fs-4 d-block">6</b><small class="opacity-75">In progress</small></div><div><b class="fs-4 d-block">12 🏆</b><small class="opacity-75">Certificates</small></div></div>
+        </div>
+      </div>
+
+      <h5 class="mb-3">Continue Learning</h5>
+      <div class="row g-3">
+        <div class="col-md-6 col-xl-4"><article class="course-card"><div class="course-thumb" style="background:linear-gradient(135deg,#2563EB,#7C3AED)"><span class="level">Module 7 of 9</span><span style="font-size:2.6rem">🐍</span><span class="play">▶</span><span class="fw-bold">Python for AI</span></div><div class="course-body"><h6>Python for AI &amp; Machine Learning</h6><div class="d-flex justify-content-between small fw-bold"><span class="text-muted2">Next: Neural Networks</span><span class="text-gradient">78%</span></div><div class="progress mt-2"><div class="progress-bar" style="width:78%"></div></div><a href="#" class="btn btn-brand btn-sm w-100 mt-3">Continue Lesson →</a></div></article></div>
+        <div class="col-md-6 col-xl-4"><article class="course-card"><div class="course-thumb" style="background:linear-gradient(135deg,#0EA5E9,#2563EB)"><span class="level">Module 5 of 12</span><span style="font-size:2.6rem">💻</span><span class="play">▶</span><span class="fw-bold">Web Development</span></div><div class="course-body"><h6>Full-Stack Web Development Bootcamp</h6><div class="d-flex justify-content-between small fw-bold"><span class="text-muted2">Next: PHP &amp; MySQL Forms</span><span class="text-gradient">46%</span></div><div class="progress mt-2"><div class="progress-bar" style="width:46%"></div></div><a href="#" class="btn btn-brand btn-sm w-100 mt-3">Continue Lesson →</a></div></article></div>
+        <div class="col-md-6 col-xl-4"><article class="course-card"><div class="course-thumb" style="background:linear-gradient(135deg,#EC4899,#7C3AED)"><span class="level">Module 3 of 8</span><span style="font-size:2.6rem">🎨</span><span class="play">▶</span><span class="fw-bold">UI/UX Design</span></div><div class="course-body"><h6>UI/UX Design Masterclass — Figma</h6><div class="d-flex justify-content-between small fw-bold"><span class="text-muted2">Next: Design Systems</span><span class="text-gradient">32%</span></div><div class="progress mt-2"><div class="progress-bar" style="width:32%"></div></div><a href="#" class="btn btn-brand btn-sm w-100 mt-3">Continue Lesson →</a></div></article></div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-5"><div class="panel"><div class="d-flex justify-content-between"><h5>Weekly Activity</h5><span class="badge-soft">Study minutes</span></div><div style="height:260px"><canvas id="activityChart"></canvas></div></div></div>
+        <div class="col-lg-3"><div class="panel"><h5>Overall Progress</h5><div style="height:260px"><canvas id="progressChart"></canvas></div></div></div>
+        <div class="col-lg-4">
+          <div class="panel mb-3"><h5>Upcoming Assignments</h5>
+            <div class="py-2 border-bottom d-flex justify-content-between"><div><b>Quiz: Neural Networks</b><br><small class="text-muted2">Python for AI · 20 questions</small></div><span class="pill pill-amber">Due Fri</span></div>
+            <div class="py-2 border-bottom d-flex justify-content-between"><div><b>Project: Portfolio Site</b><br><small class="text-muted2">Web Dev Bootcamp · Submit link</small></div><span class="pill pill-blue">Due Sun</span></div>
+            <div class="py-2 d-flex justify-content-between"><div><b>Case Study: Onboarding Flow</b><br><small class="text-muted2">UI/UX Masterclass · PDF upload</small></div><span class="pill pill-purple">Due Tue</span></div>
+          </div>
+          <div class="panel"><h5>🏆 Certificates Earned</h5>
+            <div class="py-2 border-bottom d-flex justify-content-between align-items-center"><div><b>Python Fundamentals</b><br><small class="text-muted2">Verified · ID LRN-2026-1842</small></div><a href="#" class="small fw-bold">Download</a></div>
+            <div class="py-2 border-bottom d-flex justify-content-between align-items-center"><div><b>HTML &amp; CSS Essentials</b><br><small class="text-muted2">Verified · ID LRN-2026-1617</small></div><a href="#" class="small fw-bold">Download</a></div>
+            <div class="py-2 d-flex justify-content-between align-items-center"><div><b>Data Visualisation Basics</b><br><small class="text-muted2">Verified · ID LRN-2026-1490</small></div><a href="#" class="small fw-bold">Download</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel mt-3"><h5>Recent Grades</h5><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Assessment</th><th>Course</th><th>Score</th><th>Grade</th><th>Feedback</th></tr></thead><tbody>
+        <tr><td><b>Quiz 6 — Regression Models</b></td><td>Python for AI</td><td>92/100</td><td><span class="pill pill-green">A</span></td><td>Excellent work on regularisation.</td></tr>
+        <tr><td><b>Assignment 4 — Responsive Layout</b></td><td>Web Dev Bootcamp</td><td>88/100</td><td><span class="pill pill-green">A−</span></td><td>Clean code; watch mobile spacing.</td></tr>
+        <tr><td><b>Quiz 2 — Design Principles</b></td><td>UI/UX Masterclass</td><td>95/100</td><td><span class="pill pill-green">A+</span></td><td>Outstanding grasp of hierarchy.</td></tr>
+      </tbody></table></div></div>
+      <p class="text-center text-muted2 small mt-4">Lurni Academy Cloud — Student demo with mock data · <a href="index.html">Back to website</a></p>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body></html>

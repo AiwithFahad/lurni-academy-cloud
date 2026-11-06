@@ -1,0 +1,10 @@
+.env
+uploads/*
+!uploads/.gitkeep
+!uploads/index.html
+storage/logs/*
+storage/backups/*
+!storage/logs/.gitkeep
+!storage/backups/.gitkeep
+*.log
+.DS_Store
