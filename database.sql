@@ -144,6 +144,8 @@ CREATE TABLE payments (
   billing_cycle ENUM('monthly','yearly') NULL,
   invoice_id INT UNSIGNED NULL,
   user_id INT UNSIGNED NULL,
+  kind ENUM('subscription','course') NOT NULL DEFAULT 'subscription',
+  course_id INT UNSIGNED NULL,
   amount DECIMAL(10,2) NOT NULL DEFAULT 0,
   discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
   coupon_code VARCHAR(60) NULL,
@@ -346,6 +348,8 @@ CREATE TABLE courses (
   slug VARCHAR(190) NOT NULL,
   subtitle VARCHAR(255) NULL,
   description TEXT NULL,
+  objectives TEXT NULL,
+  requirements TEXT NULL,
   thumbnail VARCHAR(255) NULL,
   level ENUM('beginner','intermediate','advanced','all_levels') NOT NULL DEFAULT 'beginner',
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -353,7 +357,10 @@ CREATE TABLE courses (
   language VARCHAR(60) NOT NULL DEFAULT 'English',
   rating DECIMAL(3,2) NOT NULL DEFAULT 0,
   status ENUM('draft','published','archived') NOT NULL DEFAULT 'draft',
+  approval_status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+  visibility ENUM('public','unlisted','private') NOT NULL DEFAULT 'public',
   is_featured TINYINT(1) NOT NULL DEFAULT 0,
+  duration_minutes INT UNSIGNED NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uq_course_tenant_slug (tenant_id, slug),
@@ -362,6 +369,10 @@ CREATE TABLE courses (
   CONSTRAINT fk_course_instructor FOREIGN KEY (instructor_id) REFERENCES instructors(id) ON DELETE SET NULL,
   CONSTRAINT fk_course_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
+-- payments is defined before courses (platform section above), so its
+-- course FK can only be attached once courses exists:
+ALTER TABLE payments ADD CONSTRAINT fk_pay_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL;
 
 CREATE TABLE course_modules (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -432,9 +443,11 @@ CREATE TABLE enrollments (
   student_id INT UNSIGNED NOT NULL,
   course_id INT UNSIGNED NOT NULL,
   progress_percent DECIMAL(5,2) NOT NULL DEFAULT 0,
-  status ENUM('active','completed','cancelled') NOT NULL DEFAULT 'active',
+  status ENUM('active','completed','cancelled','pending') NOT NULL DEFAULT 'active',
+  source VARCHAR(30) NOT NULL DEFAULT 'self',
   enrolled_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   completed_at DATETIME NULL,
+  last_accessed_at DATETIME NULL,
   UNIQUE KEY uq_enroll (student_id, course_id),
   INDEX idx_enroll_tenant (tenant_id),
   CONSTRAINT fk_enroll_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
@@ -451,6 +464,7 @@ CREATE TABLE quizzes (
   description VARCHAR(255) NULL,
   pass_percent SMALLINT NOT NULL DEFAULT 70,
   time_limit_minutes SMALLINT NOT NULL DEFAULT 0,
+  max_attempts SMALLINT NOT NULL DEFAULT 0,
   status ENUM('draft','published') NOT NULL DEFAULT 'published',
   created_by INT UNSIGNED NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -489,6 +503,9 @@ CREATE TABLE quiz_attempts (
   percent DECIMAL(5,2) NOT NULL DEFAULT 0,
   passed TINYINT(1) NOT NULL DEFAULT 0,
   answers JSON NULL,
+  answers_json JSON NULL,
+  feedback TEXT NULL,
+  feedback_by INT UNSIGNED NULL,
   started_at DATETIME NULL,
   submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_attempt_student (student_id),
@@ -506,6 +523,7 @@ CREATE TABLE assignments (
   instructions TEXT NULL,
   due_date DATETIME NULL,
   max_points SMALLINT NOT NULL DEFAULT 100,
+  allow_resubmission TINYINT(1) NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_asg_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   CONSTRAINT fk_asg_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
@@ -516,6 +534,7 @@ CREATE TABLE submissions (
   tenant_id INT UNSIGNED NOT NULL,
   assignment_id INT UNSIGNED NOT NULL,
   student_id INT UNSIGNED NOT NULL,
+  attempt_no SMALLINT NOT NULL DEFAULT 1,
   content TEXT NULL,
   file_path VARCHAR(255) NULL,
   status ENUM('submitted','graded','late') NOT NULL DEFAULT 'submitted',
@@ -524,7 +543,7 @@ CREATE TABLE submissions (
   graded_by INT UNSIGNED NULL,
   submitted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   graded_at DATETIME NULL,
-  UNIQUE KEY uq_submission (assignment_id, student_id),
+  KEY idx_subm_assignment_student (assignment_id, student_id),
   CONSTRAINT fk_subm_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   CONSTRAINT fk_subm_assignment FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
   CONSTRAINT fk_subm_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
@@ -536,7 +555,10 @@ CREATE TABLE certificates (
   student_id INT UNSIGNED NOT NULL,
   course_id INT UNSIGNED NOT NULL,
   certificate_code VARCHAR(40) NOT NULL UNIQUE,
+  title VARCHAR(255) NULL,
   issued_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  revoked_at DATETIME NULL,
+  grade VARCHAR(20) NULL,
   UNIQUE KEY uq_cert (student_id, course_id),
   CONSTRAINT fk_cert_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   CONSTRAINT fk_cert_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
@@ -571,6 +593,138 @@ CREATE TABLE messages (
   CONSTRAINT fk_msg_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
   CONSTRAINT fk_msg_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_msg_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- UPGRADE TABLES (migrations 003 + 004 — learning engagement,
+-- commerce, content & notifications)
+-- ---------------------------------------------------------------------
+
+CREATE TABLE lesson_bookmarks (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NOT NULL,
+  student_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_lesson_bookmark (student_id, lesson_id),
+  INDEX idx_bookmark_student_course (student_id, course_id),
+  CONSTRAINT fk_bookmark_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_bookmark_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  CONSTRAINT fk_bookmark_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  CONSTRAINT fk_bookmark_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE lesson_notes (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NOT NULL,
+  student_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NOT NULL,
+  note TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_lesson_note (student_id, lesson_id),
+  INDEX idx_note_student_course (student_id, course_id),
+  CONSTRAINT fk_note_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_note_student FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+  CONSTRAINT fk_note_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  CONSTRAINT fk_note_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE course_announcements (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
+  title VARCHAR(190) NOT NULL,
+  body TEXT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_announce_course (course_id),
+  CONSTRAINT fk_announce_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_announce_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  CONSTRAINT fk_announce_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE discussions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NOT NULL,
+  course_id INT UNSIGNED NOT NULL,
+  lesson_id INT UNSIGNED NULL,
+  user_id INT UNSIGNED NOT NULL,
+  parent_id INT UNSIGNED NULL,
+  body TEXT NOT NULL,
+  status ENUM('published','hidden') NOT NULL DEFAULT 'published',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_discussion_course (course_id),
+  INDEX idx_discussion_parent (parent_id),
+  CONSTRAINT fk_discussion_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_discussion_course FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+  CONSTRAINT fk_discussion_lesson FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE SET NULL,
+  CONSTRAINT fk_discussion_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_discussion_parent FOREIGN KEY (parent_id) REFERENCES discussions(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE quiz_attempt_answers (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NULL,
+  attempt_id INT UNSIGNED NOT NULL,
+  question_id INT UNSIGNED NOT NULL,
+  selected_answer_ids VARCHAR(255) NULL,
+  is_correct TINYINT(1) NOT NULL DEFAULT 0,
+  points_awarded DECIMAL(8,2) NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_attempt_question (attempt_id, question_id),
+  INDEX idx_qaa_question (question_id),
+  CONSTRAINT fk_qaa_attempt FOREIGN KEY (attempt_id) REFERENCES quiz_attempts(id) ON DELETE CASCADE,
+  CONSTRAINT fk_qaa_question FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE payment_refunds (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NULL,
+  payment_id INT UNSIGNED NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  reason VARCHAR(255) NULL,
+  status ENUM('recorded','processed') NOT NULL DEFAULT 'recorded',
+  processed_by INT UNSIGNED NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_refund_payment (payment_id),
+  CONSTRAINT fk_refund_payment FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE blog_posts (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NULL,
+  author_id INT UNSIGNED NULL,
+  title VARCHAR(190) NOT NULL,
+  slug VARCHAR(190) NOT NULL,
+  category VARCHAR(60) NULL,
+  excerpt VARCHAR(255) NULL,
+  content TEXT NULL,
+  cover_image VARCHAR(255) NULL,
+  status ENUM('draft','published') NOT NULL DEFAULT 'draft',
+  published_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_blog_tenant_slug (tenant_id, slug),
+  INDEX idx_blog_status (status),
+  CONSTRAINT fk_blog_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_blog_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE email_queue (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  tenant_id INT UNSIGNED NULL,
+  to_email VARCHAR(190) NOT NULL,
+  subject VARCHAR(190) NOT NULL,
+  body TEXT NULL,
+  status ENUM('queued','sent','failed') NOT NULL DEFAULT 'queued',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  sent_at DATETIME NULL,
+  INDEX idx_emailq_tenant (tenant_id),
+  INDEX idx_emailq_status (status),
+  CONSTRAINT fk_emailq_tenant FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
@@ -800,3 +954,70 @@ INSERT INTO activity_logs (tenant_id, user_id, description) VALUES
 
 INSERT INTO contact_messages (name, email, subject, message) VALUES
 ('Bright Tutors', 'hello@brighttutors.example', 'Demo request', 'We run a tutoring center with 12 teachers and would like a product demo this week.');
+
+-- ---------------------------------------------------------------------
+-- SEEDS: UPGRADE ADDITIONS (migrations 001-004 demo data)
+-- ---------------------------------------------------------------------
+-- Blog: the 6 posts previously hardcoded in blog.php, now in the database
+-- (tenant 1, author = academy admin user 2, all published).
+INSERT INTO blog_posts (tenant_id, author_id, title, slug, category, excerpt, content, status, published_at, created_at) VALUES
+(1, 2, 'How Demo Academy reached 1,000 learners in 90 days', 'how-demo-academy-reached-1000-learners-in-90-days', 'Growth', 'The exact playbook: categories, featured courses and certificate incentives that turned a small academy into a growing online school.', 'Ninety days ago Demo Academy had a handful of courses and a trickle of sign-ups. The team started by organising the catalogue into clear categories, featuring the strongest course on the homepage, and making sure every published course had a proper thumbnail, subtitle and outcome-focused description.
+
+The second lever was trust: every completed course ends with a verifiable certificate, and learners were encouraged to share theirs. Referrals from certificate shares, combined with a simple welcome coupon, turned steady growth into 1,000 enrolled learners before the end of the quarter.', 'published', '2026-11-02 09:00:00', '2026-11-02 09:00:00'),
+(1, 2, 'Designing quizzes students actually finish', 'designing-quizzes-students-actually-finish', 'Teaching', 'Question banks, pass marks and instant feedback that keep completion rates high without dumbing anything down.', 'Most abandoned quizzes fail for the same reasons: they are too long, the pass mark feels arbitrary, and students get no feedback until long after they have moved on. Short, focused checks at the end of a lesson — five to ten questions that test exactly what was just taught — complete at far higher rates.
+
+Set a pass mark learners can reason about, show instant feedback after each attempt, and allow a retake once the student has reviewed the lesson. Rigor stays; frustration goes.', 'published', '2026-10-26 09:00:00', '2026-10-26 09:00:00'),
+(1, 2, 'From classroom to cloud: a training center migration story', 'from-classroom-to-cloud-a-training-center-migration-story', 'Stories', 'How a 12-teacher center moved its entire catalog online in two weeks — and what they would do differently.', 'When a 12-teacher training center decided to move online, the catalogue was the easy part: courses, modules and lessons mapped neatly onto the new structure. The harder work was people — getting every teacher to record, upload and re-check their material in a consistent format.
+
+Two weeks later the full catalog was live. Their advice to other centers: migrate one department at a time, keep the old timetable running in parallel for the first cohort, and spend more time than you expect on student onboarding emails.', 'published', '2026-10-18 09:00:00', '2026-10-18 09:00:00'),
+(1, 2, 'Certificates that employers actually trust', 'certificates-that-employers-actually-trust', 'Careers', 'Unique verification codes, real assessment and transparent criteria: the three ingredients of a credible certificate.', 'A certificate is only worth something if an employer can check it in seconds. That means a unique verification code on every certificate, a public verification page, and criteria that are stated plainly: which course, which assessments, and what score was required to pass.
+
+Academies that publish their criteria and keep assessment records behind every certificate find their graduates get callbacks more often — because the credential answers the employer''s first question before it is even asked.', 'published', '2026-10-09 09:00:00', '2026-10-09 09:00:00'),
+(1, 2, 'The academy metrics dashboard: 7 numbers that matter', 'the-academy-metrics-dashboard-7-numbers-that-matter', 'Analytics', 'MRR is for platforms; academies live on enrollment velocity, completion rate and review scores. Here is how to read them.', 'It is easy to drown in analytics. For an academy, seven numbers do most of the work: new enrollments per week, activation (first lesson started), lesson completion rate, quiz pass rate, course completion rate, average review score, and repeat enrollments.
+
+Read them together, not in isolation. A course with high enrollments and low completion is a marketing success and a teaching problem; a course with modest enrollments, high completion and five-star reviews is the one to feature next.', 'published', '2026-09-30 09:00:00', '2026-09-30 09:00:00'),
+(1, 2, 'Pricing your first online course', 'pricing-your-first-online-course', 'Business', 'Anchor pricing, trials and coupons — a pragmatic guide for instructors publishing their first paid course.', 'New instructors usually price too low, fearing nobody will pay. A better approach is anchor pricing: set the honest full price, show a launch price beneath it, and let early students feel — and be — genuinely rewarded for trusting you first.
+
+Support the launch with a time-limited coupon rather than a permanent discount, and watch completion, not just sales. A course bought cheaply and never finished helps nobody; a fairly priced course that learners complete becomes your best advertisement.', 'published', '2026-09-21 09:00:00', '2026-09-21 09:00:00');
+
+-- Course announcement for course 1 (author = its instructor, user 3,
+-- via instructors id 1)
+INSERT INTO course_announcements (tenant_id, course_id, author_id, title, body, created_at) VALUES
+(1, 1, 3, 'Welcome to the PHP & MySQL Bootcamp — new PDO resources added', 'Welcome aboard! I have just added a PDO cheat sheet to the resources for the ''PDO Prepared Statements Deep Dive'' lesson. Work through Module 1 this week and bring your questions to the discussion thread.', DATE_SUB(NOW(), INTERVAL 5 DAY));
+
+-- Discussion on course 1: question by the demo student (user 5 / Ali Hassan,
+-- students id 1) on lesson 5, answered by the instructor (user 3)
+INSERT INTO discussions (id, tenant_id, course_id, lesson_id, user_id, parent_id, body, status, created_at) VALUES
+(1, 1, 1, 5, 5, NULL, 'In the PDO lesson, should I use emulated prepares or real prepares for a production app? My local setup seems to emulate by default.', 'published', DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(2, 1, 1, 5, 3, 1, 'Great question — always use real prepares in production: set PDO::ATTR_EMULATE_PREPARES to false and PDO::ATTR_ERRMODE to ERRMODE_EXCEPTION, exactly as shown in the lesson. Emulation can silently fall back to quoting in edge cases.', 'published', DATE_SUB(NOW(), INTERVAL 4 DAY));
+
+-- Demo student (students id 1) bookmark + private note
+INSERT INTO lesson_bookmarks (tenant_id, student_id, course_id, lesson_id, created_at) VALUES
+(1, 1, 1, 4, DATE_SUB(NOW(), INTERVAL 3 DAY));
+
+INSERT INTO lesson_notes (tenant_id, student_id, course_id, lesson_id, note, created_at) VALUES
+(1, 1, 1, 5, 'Remember: always set PDO::ATTR_ERRMODE to ERRMODE_EXCEPTION and use prepared statements for every query with user input — no string concatenation.', DATE_SUB(NOW(), INTERVAL 3 DAY));
+
+-- Per-question answers for the seeded quiz attempt (attempt id 1, quiz 1,
+-- students id 2): all three answers correct, matching its stored score
+-- of 5 / 5 points (questions are worth 2 + 2 + 1). Selected answer ids
+-- refer to the answers table rows inserted above (2, 5 and 7 are the
+-- is_correct rows for questions 1, 2 and 3 respectively).
+INSERT INTO quiz_attempt_answers (attempt_id, question_id, selected_answer_ids, is_correct, points_awarded, created_at) VALUES
+(1, 1, '2', 1, 2.00, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(1, 2, '5', 1, 2.00, DATE_SUB(NOW(), INTERVAL 7 DAY)),
+(1, 3, '7', 1, 1.00, DATE_SUB(NOW(), INTERVAL 7 DAY));
+
+-- One verified COURSE payment: demo student user 5 (Ali Hassan) bought
+-- course 1 (PHP & MySQL Bootcamp, price 49.00 — matches his active
+-- enrollment); verified by the tenant admin (user 2)
+INSERT INTO payments (id, tenant_id, subscription_id, user_id, kind, course_id, amount, method, reference, status, verified_by, verified_at) VALUES
+(2, 1, NULL, 5, 'course', 1, 49.00, 'manual', 'BANK-TRX-1002', 'completed', 2, DATE_SUB(NOW(), INTERVAL 6 DAY));
+
+INSERT INTO invoices (tenant_id, subscription_id, payment_id, invoice_number, description, amount, status, issued_at, due_at, paid_at) VALUES
+(1, NULL, 2, 'INV-2026-0002', 'Course purchase: PHP & MySQL Bootcamp: Build Real Web Apps', 49.00, 'paid', DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY), DATE_SUB(NOW(), INTERVAL 6 DAY));
+
+UPDATE payments SET invoice_id = (SELECT id FROM invoices WHERE invoice_number = 'INV-2026-0002') WHERE id = 2;
+
+-- Upgrade tweak: the demo assignment (id 1) allows resubmission
+UPDATE assignments SET allow_resubmission = 1 WHERE id = 1;

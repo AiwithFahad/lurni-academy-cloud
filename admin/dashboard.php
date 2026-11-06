@@ -96,6 +96,62 @@ require __DIR__ . '/../includes/header.php';
     <?php if (!$activity): ?><li class="list-group-item text-muted">Activity will appear here.</li><?php endif; ?>
     </ul></div></div>
 </div>
+<div class="card mt-3"><div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+  <span class="fw-bold"><i class="bi bi-bar-chart-line text-primary"></i> Analytics — live from your academy data</span>
+  <span class="d-flex gap-2 align-items-center">
+    <input type="date" class="form-control form-control-sm" data-analytics-from value="<?= date('Y-m-d', strtotime('-11 months')) ?>">
+    <input type="date" class="form-control form-control-sm" data-analytics-to value="<?= date('Y-m-d') ?>">
+    <button class="btn btn-sm btn-primary" data-analytics-refresh>Apply</button>
+  </span></div>
+<div class="card-body">
+  <div class="row g-3 mb-3">
+    <?php foreach ([
+        ['active_students', 'Active students', false],
+        ['enrollments_range', 'Enrollments in range', false],
+        ['revenue_range', 'Verified revenue in range', true],
+        ['pending_payments', 'Pending payments', false],
+        ['certificates_range', 'Certificates in range', false],
+        ['pending_approval', 'Courses pending approval', false],
+    ] as [$k, $label, $money]): ?>
+    <div class="col-md-4 col-xl-2"><div class="border rounded p-3 text-center h-100">
+      <div class="h4 fw-bold mb-0" data-stat="<?= $k ?>"<?= $money ? ' data-stat-money' : '' ?>>–</div>
+      <div class="small text-muted"><?= $label ?></div></div></div>
+    <?php endforeach; ?>
+  </div>
+  <div class="row g-3">
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Revenue by month</div><div style="height:230px"><canvas id="dashRevenue" data-series="revenue" data-chart-type="bar" data-chart-label="Revenue" data-chart-money></canvas></div></div>
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Student growth (cumulative)</div><div style="height:230px"><canvas id="dashGrowth" data-series="student_growth" data-chart-type="line" data-chart-label="Students"></canvas></div></div>
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Completion rate by course (%)</div><div style="height:230px"><canvas id="dashCompletion" data-series="completion" data-chart-type="bar" data-chart-label="Completion %"></canvas></div></div>
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Instructor performance</div>
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Instructor</th><th>Courses</th><th>Learners</th><th>Rating</th><th>Course revenue</th></tr></thead>
+      <tbody id="instructorPerfBody"><tr><td colspan="5" class="text-muted">Loading…</td></tr></tbody></table></div></div>
+  </div>
+</div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function fillPerf() {
+    var from = document.querySelector('[data-analytics-from]'); var to = document.querySelector('[data-analytics-to]');
+    var qs = [];
+    if (from && from.value) qs.push('from=' + encodeURIComponent(from.value));
+    if (to && to.value) qs.push('to=' + encodeURIComponent(to.value));
+    fetch('/api/analytics.php' + (qs.length ? '?' + qs.join('&') : ''), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (r) { return r.json(); }).then(function (res) {
+        var body = document.getElementById('instructorPerfBody');
+        if (!body) return;
+        if (!res.ok || !res.instructor_performance || !res.instructor_performance.length) {
+          body.innerHTML = '<tr><td colspan="5" class="text-muted">No instructor data yet.</td></tr>'; return;
+        }
+        body.innerHTML = res.instructor_performance.map(function (p) {
+          function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+          return '<tr><td>' + esc(p.name) + '</td><td>' + p.courses + '</td><td>' + p.learners + '</td><td>★ ' + Number(p.avg_rating).toFixed(1) + '</td><td>$' + Number(p.revenue).toLocaleString() + '</td></tr>';
+        }).join('');
+      }).catch(function () {});
+  }
+  fillPerf();
+  var btn = document.querySelector('[data-analytics-refresh]');
+  if (btn) btn.addEventListener('click', fillPerf);
+});
+</script>
 <script>
 new Chart(document.getElementById('enrChart'), {type:'bar',
   data:{labels:<?= json_encode($enrLabels) ?>, datasets:[{label:'Enrollments', data:<?= json_encode($enrData) ?>, backgroundColor:'#7c3aed', borderRadius:8}]},

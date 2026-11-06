@@ -84,4 +84,10 @@ require __DIR__ . '/../includes/header.php';
       </ul></div>
   </div>
 </div>
+<div class="row g-3 mt-1">
+  <div class="col-xl-6"><div class="card h-100"><div class="card-header bg-white fw-bold"><i class="bi bi-activity text-primary"></i> My learning activity — lessons completed per week</div>
+    <div class="card-body"><div style="height:220px"><canvas id="myActivity" data-series="weekly_activity" data-chart-type="bar" data-chart-label="Lessons completed"></canvas></div></div></div></div>
+  <div class="col-xl-6"><div class="card h-100"><div class="card-header bg-white fw-bold"><i class="bi bi-bar-chart text-primary"></i> Progress by course</div>
+    <div class="card-body"><div style="height:220px"><canvas id="myProgress" data-series="course_progress" data-chart-type="bar" data-chart-label="Progress %"></canvas></div></div></div></div>
+</div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -9,7 +9,7 @@ try {
         (SELECT COUNT(*) FROM enrollments en WHERE en.course_id=c.id) AS learners
         FROM courses c LEFT JOIN categories cat ON cat.id=c.category_id
         LEFT JOIN instructors i ON i.id=c.instructor_id LEFT JOIN users u ON u.id=i.user_id
-        WHERE c.id=? AND c.status='published'");
+        WHERE c.id=? AND c.status='published' AND c.approval_status='approved' AND c.visibility<>'private'");
     $s->execute([$id]); $course = $s->fetch() ?: null;
     if ($course) {
         $s = $pdo->prepare('SELECT * FROM course_modules WHERE course_id=? ORDER BY sort_order, id');
@@ -19,7 +19,7 @@ try {
         foreach ($s->fetchAll() as $l) $lessonsByModule[(int)($l['module_id'] ?? 0)][] = $l;
         $s = $pdo->prepare("SELECT r.*, u.name AS student_name FROM reviews r JOIN students st ON st.id=r.student_id JOIN users u ON u.id=st.user_id WHERE r.course_id=? AND r.status='published' ORDER BY r.created_at DESC LIMIT 10");
         $s->execute([$id]); $reviews = $s->fetchAll();
-        $s = $pdo->prepare("SELECT c.*, (SELECT COUNT(*) FROM enrollments en WHERE en.course_id=c.id) AS learners FROM courses c WHERE c.category_id=? AND c.id<>? AND c.status='published' LIMIT 3");
+        $s = $pdo->prepare("SELECT c.*, (SELECT COUNT(*) FROM enrollments en WHERE en.course_id=c.id) AS learners FROM courses c WHERE c.category_id=? AND c.id<>? AND c.status='published' AND c.approval_status='approved' AND c.visibility='public' LIMIT 3");
         $s->execute([$course['category_id'], $id]); $related = $s->fetchAll();
     }
 } catch (Throwable $ignored) {}
@@ -57,6 +57,22 @@ if ($course && $user && $user['role'] === 'student') {
         <div class="card p-4 mt-4">
           <h2 class="h5 fw-bold">About this course</h2>
           <p class="text-muted mb-0"><?= nl2br(e($course['description'] ?? '')) ?></p>
+          <?php if (!empty($course['objectives'])): ?>
+          <h2 class="h5 fw-bold mt-4 mb-2">What you will learn</h2>
+          <ul class="list-unstyled row row-cols-md-2 g-2 mb-0">
+            <?php foreach (array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string)$course['objectives']))) as $obj): ?>
+            <li class="col"><i class="bi bi-check-circle-fill text-success me-1"></i><?= e($obj) ?></li>
+            <?php endforeach; ?>
+          </ul>
+          <?php endif; ?>
+          <?php if (!empty($course['requirements'])): ?>
+          <h2 class="h5 fw-bold mt-4 mb-2">Requirements</h2>
+          <ul class="mb-0">
+            <?php foreach (array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string)$course['requirements']))) as $req): ?>
+            <li><?= e($req) ?></li>
+            <?php endforeach; ?>
+          </ul>
+          <?php endif; ?>
         </div>
         <div class="card p-4 mt-4">
           <h2 class="h5 fw-bold mb-3">Course curriculum</h2>

@@ -19,7 +19,7 @@ require __DIR__ . '/../includes/header.php';
     <i class="bi bi-award display-5 text-warning"></i>
     <h3 class="h6 fw-bold mt-2"><?= e($r['title']) ?></h3>
     <p class="text-muted small mb-1"><?= e($r['course_title']) ?></p>
-    <p class="text-muted small">Issued <?= e(date('M j, Y', strtotime($r['issued_at']))) ?> · Code <code><?= e($r['certificate_code']) ?></code><?= $r['grade'] ? ' · Grade ' . e($r['grade']) : '' ?></p>
+    <p class="text-muted small">Issued <?= e(date('M j, Y', strtotime($r['issued_at']))) ?> · Code <code><?= e($r['certificate_code']) ?></code><?= $r['grade'] ? ' · Grade ' . e($r['grade']) : '' ?> · <a href="/verify-certificate.php?code=<?= e($r['certificate_code']) ?>" target="_blank" rel="noopener">Public verification</a></p>
     <a class="btn btn-gradient" href="/student/certificate.php?id=<?= (int)$r['id'] ?>" target="_blank"><i class="bi bi-download me-1"></i>View / print certificate</a>
   </div></div></div>
   <?php endforeach; ?>

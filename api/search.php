@@ -11,7 +11,7 @@ $pdo = db();
 $q = trim((string)($_GET['q'] ?? ''));
 if (mb_strlen($q) < 2) { echo json_encode(['results' => []]); exit; }
 $s = $pdo->prepare("SELECT id, title, level, rating FROM courses
-    WHERE tenant_id=? AND status='published' AND (title LIKE ? OR subtitle LIKE ?)
+    WHERE tenant_id=? AND status='published' AND approval_status='approved' AND visibility<>'private' AND (title LIKE ? OR subtitle LIKE ?)
     ORDER BY rating DESC LIMIT 8");
 $s->execute([(int)$me['tenant_id'], "%$q%", "%$q%"]);
 echo json_encode(['results' => array_map(fn($r) => [

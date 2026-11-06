@@ -52,27 +52,70 @@
       </div>
 
       <div class="row g-3">
-        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-b"><i class="bi bi-people"></i></span><div><small class="text-muted2 fw-bold">TOTAL STUDENTS</small><br><b>1,248</b><br><span class="pill pill-green">↑ 12.4% this month</span></div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-p"><i class="bi bi-person-video3"></i></span><div><small class="text-muted2 fw-bold">INSTRUCTORS</small><br><b>86</b><br><span class="pill pill-purple">↑ 6 new this month</span></div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-t"><i class="bi bi-collection-play"></i></span><div><small class="text-muted2 fw-bold">ACTIVE COURSES</small><br><b>142</b><br><span class="pill pill-blue">18 in draft</span></div></div></div>
-        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-a"><i class="bi bi-cash-stack"></i></span><div><small class="text-muted2 fw-bold">REVENUE (NOV)</small><br><b>$12,480</b><br><span class="pill pill-green">↑ 18.2% vs Oct</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-b"><i class="bi bi-people"></i></span><div><small class="text-muted2 fw-bold">TOTAL STUDENTS</small><br><b id="adminStatStudents">1,248</b><br><span class="pill pill-green" id="adminStatStudentsNote">↑ 12.4% this month</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-p"><i class="bi bi-person-video3"></i></span><div><small class="text-muted2 fw-bold">INSTRUCTORS</small><br><b id="adminStatInstructors">86</b><br><span class="pill pill-purple" id="adminStatInstructorsNote">↑ 6 new this month</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-t"><i class="bi bi-collection-play"></i></span><div><small class="text-muted2 fw-bold">ACTIVE COURSES</small><br><b id="adminStatCourses">142</b><br><span class="pill pill-blue" id="adminStatCoursesNote">18 in draft</span></div></div></div>
+        <div class="col-md-6 col-xl-3"><div class="stat-card"><span class="stat-icon bg-a"><i class="bi bi-cash-stack"></i></span><div><small class="text-muted2 fw-bold">REVENUE (NOV)</small><br><b id="adminStatRevenue">$12,480</b><br><span class="pill pill-green" id="adminStatRevenueNote">↑ 18.2% vs Oct</span></div></div></div>
       </div>
 
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <h5 class="mb-0">Analytics</h5>
+        <div class="pricing-toggle" id="adminRangeToggle" role="group" aria-label="Analytics date range">
+          <button type="button" class="active" data-admin-range="30">30 days</button><button type="button" data-admin-range="90">90 days</button><button type="button" data-admin-range="365">12 months</button>
+        </div>
+      </div>
       <div class="row g-3 mt-1">
-        <div class="col-lg-7"><div class="panel"><div class="d-flex justify-content-between"><h5>Enrollments</h5><span class="badge-soft">Jan – Aug 2026</span></div><div style="height:280px"><canvas id="enrollmentChart"></canvas></div></div></div>
-        <div class="col-lg-5"><div class="panel"><div class="d-flex justify-content-between"><h5>Revenue</h5><span class="badge-soft badge-purple">Monthly $</span></div><div style="height:280px"><canvas id="revenueChart"></canvas></div></div></div>
+        <div class="col-lg-7"><div class="panel"><div class="d-flex justify-content-between"><h5>Enrollments</h5><span class="badge-soft" id="adminEnrollRangeLabel">Last 30 days</span></div><div style="height:280px"><canvas id="enrollmentChart"></canvas></div></div></div>
+        <div class="col-lg-5"><div class="panel"><div class="d-flex justify-content-between"><h5>Revenue</h5><span class="badge-soft badge-purple" id="adminRevenueRangeLabel">Last 30 days · $</span></div><div style="height:280px"><canvas id="revenueChart"></canvas></div></div></div>
+      </div>
+
+      <!-- Manage courses & students: live search + filters (client-side demo) -->
+      <div class="panel mt-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><h5 class="mb-0">Manage Courses &amp; Students</h5><span class="badge-soft">Live filters</span></div>
+        <div class="row g-2">
+          <div class="col-md-5"><input id="adminSearch" type="search" class="form-control" placeholder="Search courses or students — try “Python”, “Ayesha”…"></div>
+          <div class="col-md-3"><select id="adminCategoryFilter" class="form-select" aria-label="Category filter"><option value="all">All categories</option><option value="data-science">Data Science &amp; AI</option><option value="development">Development</option><option value="design">Design</option><option value="marketing">Marketing</option><option value="business">Business</option></select></div>
+          <div class="col-md-4"><select id="adminStatusFilter" class="form-select" aria-label="Status filter"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="active">Active</option><option value="pending">Pending payment</option><option value="trial">Trial</option></select></div>
+        </div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-lg-7"><div class="panel">
+          <h5>All Courses</h5>
+          <div class="table-responsive"><table class="table align-middle mb-0" id="adminCoursesTable"><thead><tr><th>Course</th><th>Category</th><th>Instructor</th><th>Students</th><th>Status</th></tr></thead><tbody>
+            <tr data-category="data-science" data-status="published" data-search="python for ai machine learning sara khan"><td><b>🐍 Python for AI &amp; ML</b></td><td>Data Science &amp; AI</td><td>Dr. Sara Khan</td><td>3,240</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="development" data-status="published" data-search="full stack web development bootcamp ayesha rahman"><td><b>💻 Web Dev Bootcamp</b></td><td>Development</td><td>Ayesha Rahman</td><td>4,120</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="design" data-status="published" data-search="ui ux design masterclass figma james miller"><td><b>🎨 UI/UX Masterclass</b></td><td>Design</td><td>James Miller</td><td>2,810</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="data-science" data-status="published" data-search="data science python pandas david osei"><td><b>📊 Data Science with Pandas</b></td><td>Data Science &amp; AI</td><td>David Osei</td><td>2,260</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="marketing" data-status="published" data-search="digital marketing seo growth nina patel"><td><b>📈 Digital Marketing &amp; SEO</b></td><td>Marketing</td><td>Nina Patel</td><td>1,940</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="business" data-status="published" data-search="business leadership entrepreneurship maria lopez"><td><b>🚀 Business Leadership</b></td><td>Business</td><td>Maria Lopez</td><td>1,530</td><td><span class="pill pill-green">Published</span></td></tr>
+            <tr data-category="data-science" data-status="draft" data-search="nlp foundations sara khan"><td><b>🧠 NLP Foundations</b></td><td>Data Science &amp; AI</td><td>Dr. Sara Khan</td><td>—</td><td><span class="pill pill-amber">Draft</span></td></tr>
+          </tbody></table></div>
+          <p class="text-muted2 small mb-0 mt-2" id="adminCoursesEmpty" hidden>No courses match the current search / filters.</p>
+        </div></div>
+        <div class="col-lg-5"><div class="panel">
+          <h5>Students</h5>
+          <div class="table-responsive"><table class="table align-middle mb-0" id="adminStudentsTable"><thead><tr><th>Student</th><th>Course</th><th>Status</th></tr></thead><tbody>
+            <tr data-category="data-science" data-status="active" data-search="ayesha rahman python for ai"><td><span class="av av-sm bg-b me-2">AR</span><b>Ayesha Rahman</b></td><td>Python for AI</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="development" data-status="active" data-search="bilal omar web dev bootcamp"><td><span class="av av-sm bg-p me-2">BO</span><b>Bilal Omar</b></td><td>Web Dev Bootcamp</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="design" data-status="pending" data-search="nina patel ui ux masterclass"><td><span class="av av-sm bg-t me-2">NP</span><b>Nina Patel</b></td><td>UI/UX Masterclass</td><td><span class="pill pill-amber">Pending payment</span></td></tr>
+            <tr data-category="data-science" data-status="active" data-search="david osei data science"><td><span class="av av-sm bg-a me-2">DO</span><b>David Osei</b></td><td>Data Science</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="marketing" data-status="trial" data-search="maria lopez digital marketing"><td><span class="av av-sm bg-pk me-2">ML</span><b>Maria Lopez</b></td><td>Digital Marketing</td><td><span class="pill pill-blue">Trial</span></td></tr>
+            <tr data-category="data-science" data-status="active" data-search="zain khan python for ai"><td><span class="av av-sm bg-g me-2">ZK</span><b>Zain Khan</b></td><td>Python for AI</td><td><span class="pill pill-green">Active</span></td></tr>
+          </tbody></table></div>
+          <p class="text-muted2 small mb-0 mt-2" id="adminStudentsEmpty" hidden>No students match the current search / filters.</p>
+        </div></div>
       </div>
 
       <div class="row g-3 mt-1">
         <div class="col-lg-7"><div class="panel">
           <div class="d-flex justify-content-between align-items-center mb-2"><h5 class="mb-0">Recent Enrollments</h5><a href="#" class="small fw-bold">View all →</a></div>
-          <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-            <tr><td><span class="av av-sm bg-b me-2">AR</span><b>Ayesha Rahman</b></td><td>Python for AI</td><td>6 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
-            <tr><td><span class="av av-sm bg-p me-2">BO</span><b>Bilal Omar</b></td><td>Web Dev Bootcamp</td><td>5 Nov 2026</td><td>$59</td><td><span class="pill pill-green">Active</span></td></tr>
-            <tr><td><span class="av av-sm bg-t me-2">NP</span><b>Nina Patel</b></td><td>UI/UX Masterclass</td><td>5 Nov 2026</td><td>$39</td><td><span class="pill pill-amber">Pending payment</span></td></tr>
-            <tr><td><span class="av av-sm bg-a me-2">DO</span><b>David Osei</b></td><td>Data Science</td><td>4 Nov 2026</td><td>$54</td><td><span class="pill pill-green">Active</span></td></tr>
-            <tr><td><span class="av av-sm bg-pk me-2">ML</span><b>Maria Lopez</b></td><td>Digital Marketing</td><td>4 Nov 2026</td><td>$29</td><td><span class="pill pill-blue">Trial</span></td></tr>
-            <tr><td><span class="av av-sm bg-g me-2">ZK</span><b>Zain Khan</b></td><td>Python for AI</td><td>3 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
+          <div class="table-responsive"><table class="table align-middle mb-0" id="adminEnrollmentsTable"><thead><tr><th>Student</th><th>Course</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+            <tr data-category="data-science" data-status="active" data-search="ayesha rahman python for ai"><td><span class="av av-sm bg-b me-2">AR</span><b>Ayesha Rahman</b></td><td>Python for AI</td><td>6 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="development" data-status="active" data-search="bilal omar web dev bootcamp"><td><span class="av av-sm bg-p me-2">BO</span><b>Bilal Omar</b></td><td>Web Dev Bootcamp</td><td>5 Nov 2026</td><td>$59</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="design" data-status="pending" data-search="nina patel ui ux masterclass"><td><span class="av av-sm bg-t me-2">NP</span><b>Nina Patel</b></td><td>UI/UX Masterclass</td><td>5 Nov 2026</td><td>$39</td><td><span class="pill pill-amber">Pending payment</span></td></tr>
+            <tr data-category="data-science" data-status="active" data-search="david osei data science"><td><span class="av av-sm bg-a me-2">DO</span><b>David Osei</b></td><td>Data Science</td><td>4 Nov 2026</td><td>$54</td><td><span class="pill pill-green">Active</span></td></tr>
+            <tr data-category="marketing" data-status="trial" data-search="maria lopez digital marketing"><td><span class="av av-sm bg-pk me-2">ML</span><b>Maria Lopez</b></td><td>Digital Marketing</td><td>4 Nov 2026</td><td>$29</td><td><span class="pill pill-blue">Trial</span></td></tr>
+            <tr data-category="data-science" data-status="active" data-search="zain khan python for ai"><td><span class="av av-sm bg-g me-2">ZK</span><b>Zain Khan</b></td><td>Python for AI</td><td>3 Nov 2026</td><td>$49</td><td><span class="pill pill-green">Active</span></td></tr>
           </tbody></table></div>
         </div></div>
         <div class="col-lg-5">

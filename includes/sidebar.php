@@ -28,6 +28,7 @@ $menus = [
         ['key' => 'progress', 'href' => '/admin/progress.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Student Progress'],
         ['key' => 'certificates', 'href' => '/admin/certificates.php', 'icon' => 'bi-award', 'label' => 'Certificates'],
         ['key' => 'reviews', 'href' => '/admin/reviews.php', 'icon' => 'bi-star', 'label' => 'Reviews & Ratings'],
+        ['key' => 'blog', 'href' => '/admin/blog.php', 'icon' => 'bi-newspaper', 'label' => 'Blog'],
         ['key' => 'payments', 'href' => '/admin/payments.php', 'icon' => 'bi-credit-card', 'label' => 'Payments'],
         ['key' => 'notifications', 'href' => '/admin/notifications.php', 'icon' => 'bi-bell', 'label' => 'Notifications'],
         ['section' => 'Account'],
@@ -57,6 +58,8 @@ $menus = [
         ['key' => 'progress', 'href' => '/student/progress.php', 'icon' => 'bi-graph-up-arrow', 'label' => 'Progress'],
         ['key' => 'grades', 'href' => '/student/grades.php', 'icon' => 'bi-mortarboard', 'label' => 'Grades'],
         ['key' => 'certificates', 'href' => '/student/certificates.php', 'icon' => 'bi-award', 'label' => 'Certificates'],
+        ['key' => 'calendar', 'href' => '/student/calendar.php', 'icon' => 'bi-calendar3', 'label' => 'Calendar'],
+        ['key' => 'payments', 'href' => '/student/payments.php', 'icon' => 'bi-credit-card', 'label' => 'Payment History'],
         ['key' => 'messages', 'href' => '/student/messages.php', 'icon' => 'bi-chat-dots', 'label' => 'Messages'],
     ],
 ];

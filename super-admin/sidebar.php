@@ -2,9 +2,11 @@
 $active = $active ?? '';
 $items = [
     ['section' => 'Platform'],
-    ['key' => 'dashboard', 'href' => '/super-admin/index.php', 'icon' => 'bi-grid-1x2', 'label' => 'Dashboard'],
-    ['key' => 'tenants', 'href' => '/super-admin/tenants.php', 'icon' => 'bi-buildings', 'label' => 'Tenants'],
+    ['key' => 'dashboard', 'href' => '/super-admin/dashboard.php', 'icon' => 'bi-grid-1x2', 'label' => 'Dashboard'],
+    ['key' => 'institutions', 'href' => '/super-admin/institutions.php', 'icon' => 'bi-buildings', 'label' => 'Institutions'],
     ['key' => 'users', 'href' => '/super-admin/users.php', 'icon' => 'bi-people', 'label' => 'Users'],
+    ['key' => 'courses', 'href' => '/super-admin/courses.php', 'icon' => 'bi-journal-bookmark', 'label' => 'Courses'],
+    ['key' => 'reports', 'href' => '/super-admin/reports.php', 'icon' => 'bi-bar-chart', 'label' => 'Reports'],
     ['section' => 'Billing'],
     ['key' => 'plans', 'href' => '/super-admin/plans.php', 'icon' => 'bi-gem', 'label' => 'Plans'],
     ['key' => 'subscriptions', 'href' => '/super-admin/subscriptions.php', 'icon' => 'bi-arrow-repeat', 'label' => 'Subscriptions'],

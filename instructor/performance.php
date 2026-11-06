@@ -25,12 +25,30 @@ $s = $pdo->prepare("SELECT r.*, c.title AS course_title, u.name AS student_name 
     JOIN courses c ON c.id=r.course_id JOIN students st ON st.id=r.student_id JOIN users u ON u.id=st.user_id
     WHERE r.tenant_id=? AND c.instructor_id=? AND r.status='published' ORDER BY r.created_at DESC LIMIT 6");
 $s->execute([$tid, $iid]); $reviews = $s->fetchAll();
+// Course revenue (upgrade): verified course payments only, own courses only.
+$s = $pdo->prepare("SELECT c.title,
+    COALESCE(SUM(CASE WHEN p.status='completed' THEN p.amount-p.discount_amount ELSE 0 END),0) AS revenue,
+    SUM(CASE WHEN p.status='pending' THEN 1 ELSE 0 END) AS pending_count,
+    SUM(CASE WHEN p.status='completed' THEN 1 ELSE 0 END) AS sales
+    FROM courses c LEFT JOIN payments p ON p.course_id=c.id AND p.kind='course' AND p.tenant_id=c.tenant_id
+    WHERE c.tenant_id=? AND c.instructor_id=? GROUP BY c.id ORDER BY revenue DESC");
+$s->execute([$tid, $iid]); $revenueRows = $s->fetchAll();
+$totalRevenue = array_sum(array_map(fn($r) => (float)$r['revenue'], $revenueRows));
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="row g-3 mb-4">
   <div class="col-xl-7"><div class="card h-100"><div class="card-header bg-white fw-bold">Learners per course</div>
     <div class="card-body"><canvas id="perfChart" height="220"></canvas></div></div></div>
-  <div class="col-xl-5"><div class="card h-100"><div class="card-header bg-white fw-bold">Latest reviews</div>
+  <div class="col-xl-5"><div class="card mb-3"><div class="card-header bg-white fw-bold">Course revenue <span class="badge bg-success-subtle text-success ms-1"><?= money($totalRevenue) ?> verified</span></div>
+    <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Course</th><th>Sales</th><th>Pending</th><th class="text-end">Revenue</th></tr></thead><tbody>
+      <?php foreach ($revenueRows as $r): ?>
+      <tr><td><small><?= e($r['title']) ?></small></td><td><?= (int)$r['sales'] ?></td><td><?= (int)$r['pending_count'] ?></td><td class="text-end fw-semibold"><?= money((float)$r['revenue']) ?></td></tr>
+      <?php endforeach; ?>
+      <?php if (!$revenueRows): ?><tr><td colspan="4" class="text-muted text-center">No courses yet.</td></tr><?php endif; ?>
+      </tbody></table></div>
+    <div class="card-footer bg-white small text-muted">Only verified payments count as revenue; pending purchases appear once the academy confirms them.</div></div>
+  <div class="card h-100"><div class="card-header bg-white fw-bold">Latest reviews</div>
     <ul class="list-group list-group-flush">
     <?php foreach ($reviews as $r): ?>
       <li class="list-group-item"><span class="text-warning"><?= stars((float)$r['rating']) ?></span> <strong><?= e($r['student_name']) ?></strong>

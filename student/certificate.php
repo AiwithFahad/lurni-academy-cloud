@@ -61,7 +61,7 @@ $s->execute([(int)$cert['tenant_id']]); $academy = (string)$s->fetchColumn();
     <div class="d-flex justify-content-between mt-5 text-muted small">
       <span>Issued: <?= e(date('F j, Y', strtotime($cert['issued_at']))) ?></span>
       <span>Certificate code: <strong><?= e($cert['certificate_code']) ?></strong></span>
-      <span>Verify at Lurni Academy Cloud</span>
+      <span>Verify at <?= e(APP_URL) ?>/verify-certificate.php?code=<?= e($cert['certificate_code']) ?></span>
     </div>
   </div>
   <div class="text-center no-print mb-5"><button class="btn btn-primary" onclick="window.print()">Print / save as PDF</button></div>

@@ -25,12 +25,12 @@ if (is_post()) {
         if ((int)$own->fetchColumn() === 0) { flash('error', 'Choose one of your own courses.'); redirect('/instructor/assignments.php'); }
         $due = post('due_date') !== '' ? str_replace('T', ' ', post('due_date')) . ':00' : null;
         if ($id) {
-            $pdo->prepare('UPDATE assignments a JOIN courses c ON c.id=a.course_id SET a.course_id=?, a.title=?, a.instructions=?, a.due_date=?, a.max_points=? WHERE a.id=? AND a.tenant_id=? AND c.instructor_id=?')
-                ->execute([$cid, post('title'), post('instructions'), $due, max(1, (int)($_POST['max_points'] ?? 100)), $id, $tid, $iid]);
+            $pdo->prepare('UPDATE assignments a JOIN courses c ON c.id=a.course_id SET a.course_id=?, a.title=?, a.instructions=?, a.due_date=?, a.max_points=?, a.allow_resubmission=? WHERE a.id=? AND a.tenant_id=? AND c.instructor_id=?')
+                ->execute([$cid, post('title'), post('instructions'), $due, max(1, (int)($_POST['max_points'] ?? 100)), isset($_POST['allow_resubmission']) ? 1 : 0, $id, $tid, $iid]);
             flash('success', 'Assignment updated.');
         } else {
-            $pdo->prepare('INSERT INTO assignments(tenant_id,course_id,created_by,title,instructions,due_date,max_points) VALUES(?,?,?,?,?,?,?)')
-                ->execute([$tid, $cid, $me['id'], post('title'), post('instructions'), $due, max(1, (int)($_POST['max_points'] ?? 100))]);
+            $pdo->prepare('INSERT INTO assignments(tenant_id,course_id,created_by,title,instructions,due_date,max_points,allow_resubmission) VALUES(?,?,?,?,?,?,?,?)')
+                ->execute([$tid, $cid, $me['id'], post('title'), post('instructions'), $due, max(1, (int)($_POST['max_points'] ?? 100)), isset($_POST['allow_resubmission']) ? 1 : 0]);
             flash('success', 'Assignment created.');
         }
     } elseif ($action === 'delete') {
@@ -75,6 +75,7 @@ require __DIR__ . '/../includes/header.php';
       <div class="row g-2">
         <div class="col-7 mb-2"><label class="form-label">Due date</label><input class="form-control" type="datetime-local" name="due_date" value="<?= $edit && $edit['due_date'] ? e(date('Y-m-d\TH:i', strtotime($edit['due_date']))) : '' ?>"></div>
         <div class="col-5 mb-2"><label class="form-label">Max points</label><input class="form-control" type="number" min="1" name="max_points" value="<?= e($edit['max_points'] ?? '100') ?>"></div>
+        <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="allow_resubmission" id="ar-i" <?= !empty($edit['allow_resubmission']) ? 'checked' : '' ?>><label class="form-check-label" for="ar-i">Allow resubmission after grading (new attempt)</label></div>
       </div>
       <button class="btn btn-primary w-100"><?= $edit ? 'Update assignment' : 'Create assignment' ?></button>
       <?php if ($edit): ?><a class="btn btn-link w-100" href="/instructor/assignments.php">Cancel</a><?php endif; ?>

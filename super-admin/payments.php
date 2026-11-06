@@ -51,8 +51,10 @@ if (is_post()) {
         flash('success', 'Payment marked failed.');
     } elseif ($pay && $action === 'refund' && $pay['status'] === 'completed') {
         $pdo->prepare("UPDATE payments SET status='refunded' WHERE id=?")->execute([$id]);
+        $pdo->prepare("INSERT INTO payment_refunds(tenant_id,payment_id,amount,reason,status,processed_by,created_at) VALUES(?,?,?,?,'recorded',?,NOW())")
+            ->execute([$pay['tenant_id'] !== null ? (int)$pay['tenant_id'] : null, $id, (float)$pay['amount'] - (float)$pay['discount_amount'], 'Platform refund', $me['id']]);
         audit_log($pdo, 'payment_refunded', 'payments', $id);
-        flash('success', 'Payment marked refunded.');
+        flash('success', 'Payment marked refunded and the refund was recorded.');
     }
     redirect('/super-admin/payments.php');
 }

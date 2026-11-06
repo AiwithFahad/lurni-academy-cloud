@@ -23,15 +23,21 @@ if (is_post()) {
                 else { flash('error', 'Upload failed: ' . implode(' ', $up['errors'])); redirect('/student/assignments.php'); }
             }
             if ($asg['due_date'] && strtotime($asg['due_date']) < time()) $status = 'late';
-            $existing = $pdo->prepare('SELECT id, status FROM submissions WHERE assignment_id=? AND student_id=? AND tenant_id=?');
+            $existing = $pdo->prepare('SELECT id, status, attempt_no FROM submissions WHERE assignment_id=? AND student_id=? AND tenant_id=? ORDER BY attempt_no DESC, id DESC LIMIT 1');
             $existing->execute([$aid, $sid, $tid]); $ex = $existing->fetch();
-            if ($ex) {
-                if ($ex['status'] === 'graded') { flash('error', 'This submission is already graded and cannot be changed.'); redirect('/student/assignments.php'); }
+            if ($ex && $ex['status'] === 'graded') {
+                // Graded work changes only as a fresh attempt, and only when
+                // the assignment allows resubmission.
+                if (empty($asg['allow_resubmission'])) { flash('error', 'This submission is already graded and this assignment does not allow resubmission.'); redirect('/student/assignments.php'); }
+                $pdo->prepare('INSERT INTO submissions(tenant_id,assignment_id,student_id,content,file_path,status,attempt_no) VALUES(?,?,?,?,?,?,?)')
+                    ->execute([$tid, $aid, $sid, post('content'), $filePath, $status, (int)$ex['attempt_no'] + 1]);
+                flash('success', 'Resubmitted as attempt ' . ((int)$ex['attempt_no'] + 1) . '.' . ($status === 'late' ? ' It was marked late.' : ''));
+            } elseif ($ex) {
                 $pdo->prepare('UPDATE submissions SET content=?, file_path=COALESCE(?,file_path), status=?, submitted_at=NOW() WHERE id=?')
                     ->execute([post('content'), $filePath, $status, (int)$ex['id']]);
                 flash('success', 'Submission updated.');
             } else {
-                $pdo->prepare('INSERT INTO submissions(tenant_id,assignment_id,student_id,content,file_path,status) VALUES(?,?,?,?,?,?)')
+                $pdo->prepare('INSERT INTO submissions(tenant_id,assignment_id,student_id,content,file_path,status,attempt_no) VALUES(?,?,?,?,?,?,1)')
                     ->execute([$tid, $aid, $sid, post('content'), $filePath, $status]);
                 flash('success', 'Assignment submitted.' . ($status === 'late' ? ' It was marked late.' : ''));
             }
@@ -41,10 +47,10 @@ if (is_post()) {
     redirect('/student/assignments.php');
 }
 
-$s = $pdo->prepare("SELECT a.*, c.title AS course_title, s.id AS sub_id, s.status AS sub_status, s.grade, s.feedback, s.submitted_at
+$s = $pdo->prepare("SELECT a.*, c.title AS course_title, s.id AS sub_id, s.status AS sub_status, s.grade, s.feedback, s.submitted_at, s.attempt_no
     FROM assignments a JOIN courses c ON c.id=a.course_id
     JOIN enrollments en ON en.course_id=a.course_id AND en.student_id=?
-    LEFT JOIN submissions s ON s.assignment_id=a.id AND s.student_id=?
+    LEFT JOIN submissions s ON s.id=(SELECT s2.id FROM submissions s2 WHERE s2.assignment_id=a.id AND s2.student_id=? ORDER BY s2.attempt_no DESC, s2.id DESC LIMIT 1)
     WHERE a.tenant_id=? ORDER BY (s.id IS NOT NULL), a.due_date IS NULL, a.due_date");
 $s->execute([$sid, $sid, $tid]); $rows = $s->fetchAll();
 require __DIR__ . '/../includes/header.php';
@@ -60,7 +66,18 @@ require __DIR__ . '/../includes/header.php';
     </div>
     <?php if ($a['instructions']): ?><p class="small text-muted mt-2 mb-2"><?= nl2br(e($a['instructions'])) ?></p><?php endif; ?>
     <?php if ($a['sub_status'] === 'graded'): ?>
-      <div class="alert alert-success py-2 mb-0"><strong>Grade: <?= rtrim(rtrim(number_format((float)$a['grade'], 2), '0'), '.') ?> / <?= (int)$a['max_points'] ?></strong><?php if ($a['feedback']): ?><br><span class="small"><?= e($a['feedback']) ?></span><?php endif; ?></div>
+      <div class="alert alert-success py-2 mb-2"><strong>Grade: <?= rtrim(rtrim(number_format((float)$a['grade'], 2), '0'), '.') ?> / <?= (int)$a['max_points'] ?></strong> <small class="text-muted">(attempt <?= (int)($a['attempt_no'] ?? 1) ?>)</small><?php if ($a['feedback']): ?><br><span class="small"><?= e($a['feedback']) ?></span><?php endif; ?></div>
+      <?php if (!empty($a['allow_resubmission'])): ?>
+      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#sub<?= (int)$a['id'] ?>">Resubmit (new attempt)</button>
+      <div class="collapse mt-3" id="sub<?= (int)$a['id'] ?>">
+        <form method="post" enctype="multipart/form-data"><?= csrf_field() ?>
+          <input type="hidden" name="action" value="submit"><input type="hidden" name="assignment_id" value="<?= (int)$a['id'] ?>">
+          <div class="mb-2"><label class="form-label">Your answer / notes</label><textarea class="form-control" name="content" rows="3" placeholder="Paste your work, a link, or notes for your instructor…"></textarea></div>
+          <div class="mb-2"><label class="form-label">Attach a file (optional)</label><input class="form-control" type="file" name="file"></div>
+          <button class="btn btn-gradient">Submit new attempt</button>
+        </form>
+      </div>
+      <?php endif; ?>
     <?php elseif (!$a['sub_id'] || $a['sub_status'] !== 'graded'): ?>
       <button class="btn btn-sm <?= $a['sub_id'] ? 'btn-outline-primary' : 'btn-gradient' ?>" data-bs-toggle="collapse" data-bs-target="#sub<?= (int)$a['id'] ?>"><?= $a['sub_id'] ? 'Update submission' : 'Submit work' ?></button>
       <div class="collapse mt-3" id="sub<?= (int)$a['id'] ?>">

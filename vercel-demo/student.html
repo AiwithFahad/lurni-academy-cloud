@@ -54,6 +54,53 @@
       </div>
 
       <div class="row g-3 mt-1">
+        <div class="col-lg-7"><div class="panel">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h5 class="mb-0">🐍 Python for AI — Module 7 Lessons</h5><span class="badge-soft" id="lessonCompletedCount">2 of 5 completed</span></div>
+          <div class="d-flex justify-content-between small fw-bold mt-3"><span class="text-muted2">Module progress</span><span class="text-gradient" id="lessonProgressPct">40%</span></div>
+          <div class="progress mt-2"><div class="progress-bar" id="lessonProgressBar" style="width:40%"></div></div>
+          <div class="mt-3">
+            <div class="lesson-item" data-lesson-item data-completed="true"><div><b>7.1 Neural Networks — The Big Idea</b><br><small class="text-muted2">Video · 10:24</small></div><div class="d-flex gap-2 ms-auto"><button type="button" class="icon-toggle-btn lesson-bookmark-btn" data-bookmark-btn aria-pressed="false" aria-label="Bookmark lesson 7.1"><i class="bi bi-bookmark"></i></button><button type="button" class="btn btn-brand btn-sm lesson-complete-btn is-complete" data-complete-btn aria-pressed="true">Completed ✓</button></div></div>
+            <div class="lesson-item" data-lesson-item data-completed="true"><div><b>7.2 Perceptrons &amp; Layers</b><br><small class="text-muted2">Video · 12:05</small></div><div class="d-flex gap-2 ms-auto"><button type="button" class="icon-toggle-btn lesson-bookmark-btn" data-bookmark-btn aria-pressed="false" aria-label="Bookmark lesson 7.2"><i class="bi bi-bookmark"></i></button><button type="button" class="btn btn-brand btn-sm lesson-complete-btn is-complete" data-complete-btn aria-pressed="true">Completed ✓</button></div></div>
+            <div class="lesson-item" data-lesson-item data-completed="false"><div><b>7.3 Activation Functions</b><br><small class="text-muted2">Video · 09:41</small></div><div class="d-flex gap-2 ms-auto"><button type="button" class="icon-toggle-btn lesson-bookmark-btn" data-bookmark-btn aria-pressed="false" aria-label="Bookmark lesson 7.3"><i class="bi bi-bookmark"></i></button><button type="button" class="btn btn-brand btn-sm lesson-complete-btn" data-complete-btn aria-pressed="false">Mark complete</button></div></div>
+            <div class="lesson-item" data-lesson-item data-completed="false"><div><b>7.4 Backpropagation, Step by Step</b><br><small class="text-muted2">Video · 14:18</small></div><div class="d-flex gap-2 ms-auto"><button type="button" class="icon-toggle-btn lesson-bookmark-btn" data-bookmark-btn aria-pressed="false" aria-label="Bookmark lesson 7.4"><i class="bi bi-bookmark"></i></button><button type="button" class="btn btn-brand btn-sm lesson-complete-btn" data-complete-btn aria-pressed="false">Mark complete</button></div></div>
+            <div class="lesson-item" data-lesson-item data-completed="false"><div><b>7.5 Mini Project: Build a Neuron</b><br><small class="text-muted2">Project · 25 min</small></div><div class="d-flex gap-2 ms-auto"><button type="button" class="icon-toggle-btn lesson-bookmark-btn" data-bookmark-btn aria-pressed="false" aria-label="Bookmark lesson 7.5"><i class="bi bi-bookmark"></i></button><button type="button" class="btn btn-brand btn-sm lesson-complete-btn" data-complete-btn aria-pressed="false">Mark complete</button></div></div>
+          </div>
+        </div></div>
+        <div class="col-lg-5"><div class="panel" id="quizPanel">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h5 class="mb-0">📝 Quiz: Neural Networks</h5><span class="pill pill-amber">⏱ <span id="quizTimer">05:00</span></span></div>
+          <p class="text-muted2 small mt-2">4 questions · pass mark 75% · graded instantly in your browser.</p>
+          <form id="quizForm">
+            <fieldset class="quiz-question" data-quiz-question><legend class="small fw-bold">1. Which function introduces non-linearity so a network can learn complex patterns?</legend>
+              <label class="quiz-option"><input type="radio" name="quizQ1" value="linear"> A linear function</label>
+              <label class="quiz-option"><input type="radio" name="quizQ1" value="relu"> ReLU activation</label>
+              <label class="quiz-option"><input type="radio" name="quizQ1" value="sum"> A plain sum of inputs</label>
+              <span class="quiz-feedback small fw-bold"></span></fieldset>
+            <fieldset class="quiz-question" data-quiz-question><legend class="small fw-bold">2. What does backpropagation calculate?</legend>
+              <label class="quiz-option"><input type="radio" name="quizQ2" value="pixels"> The pixels of an image</label>
+              <label class="quiz-option"><input type="radio" name="quizQ2" value="gradients"> Gradients of the loss for each weight</label>
+              <label class="quiz-option"><input type="radio" name="quizQ2" value="labels"> New labels for the dataset</label>
+              <span class="quiz-feedback small fw-bold"></span></fieldset>
+            <fieldset class="quiz-question" data-quiz-question><legend class="small fw-bold">3. Which task is a supervised classification problem?</legend>
+              <label class="quiz-option"><input type="radio" name="quizQ3" value="clustering"> Grouping unlabelled photos by similarity</label>
+              <label class="quiz-option"><input type="radio" name="quizQ3" value="classification"> Predicting “spam” or “not spam” from labelled emails</label>
+              <label class="quiz-option"><input type="radio" name="quizQ3" value="compression"> Compressing a video file</label>
+              <span class="quiz-feedback small fw-bold"></span></fieldset>
+            <fieldset class="quiz-question" data-quiz-question><legend class="small fw-bold">4. A model that memorises the training data but fails on new data is…</legend>
+              <label class="quiz-option"><input type="radio" name="quizQ4" value="underfit"> Underfitting</label>
+              <label class="quiz-option"><input type="radio" name="quizQ4" value="regularised"> Well regularised</label>
+              <label class="quiz-option"><input type="radio" name="quizQ4" value="overfit"> Overfitting</label>
+              <span class="quiz-feedback small fw-bold"></span></fieldset>
+            <button type="submit" class="btn btn-brand btn-sm w-100 mt-2" id="quizSubmitBtn">Submit Quiz</button>
+          </form>
+          <div id="quizResult" class="mt-3" hidden>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><b id="quizScoreText">Score: 0 / 4</b><span class="pill pill-green" id="quizPassFail">Passed</span></div>
+            <p class="text-muted2 small mb-0 mt-2" id="quizResultNote"></p>
+            <button type="button" class="btn btn-outline-brand btn-sm w-100 mt-3" id="quizRetakeBtn">↻ Retake Quiz</button>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="row g-3 mt-1">
         <div class="col-lg-5"><div class="panel"><div class="d-flex justify-content-between"><h5>Weekly Activity</h5><span class="badge-soft">Study minutes</span></div><div style="height:260px"><canvas id="activityChart"></canvas></div></div></div>
         <div class="col-lg-3"><div class="panel"><h5>Overall Progress</h5><div style="height:260px"><canvas id="progressChart"></canvas></div></div></div>
         <div class="col-lg-4">

@@ -31,14 +31,37 @@ usage bars), Notifications + support tickets, Reports with CSV export, and
 Website Settings (branding, logo, contact info).
 
 **Instructor portal** — own-courses CRUD with thumbnails, modules & lessons,
-quizzes + questions, assignments (homework), submission grading with
-feedback, course performance analytics, messaging students and admins.
+material uploads, quizzes + questions (single / multiple-answer /
+true-false, attempt limits), assignments with resubmission rules, submission
+grading with feedback, quiz-attempt feedback, course performance + verified
+course-revenue analytics, messaging students and admins. New instructor
+courses are submitted for academy approval before they list publicly.
 
-**Student portal** — course catalog with search/filter, free enrollment,
-lesson player (video/text) with progress tracking, downloadable resources,
-timed quizzes with instant server-side grading, assignment submission with
-file upload, progress dashboard, grades, and printable certificates that are
-issued automatically at 100% course completion.
+**Student portal** — course catalog with search/filter, free enrollment and
+paid-course purchases (coupon support; enrollment activates only after the
+academy verifies the payment), lesson player (video/text) with previous /
+next navigation, complete-and-advance, bookmarks and per-lesson notes,
+course announcements and discussion / Q&A, progress tracking, downloadable
+resources, timed quizzes with a JavaScript countdown and instant
+server-side grading, assignment submission with file upload and
+resubmission, a learning calendar, payment history with invoices, progress
+dashboard, grades, and printable certificates that are issued automatically
+at 100% course completion — each with a unique code verifiable publicly at
+`/verify-certificate.php`.
+
+**Analytics API** — `GET /api/analytics.php?from=…&to=…` returns real,
+role-scoped aggregates (students, instructors, courses, enrollments,
+completion rate, verified revenue, pending payments, certificates) and
+Chart.js series (monthly enrollments, revenue, student growth, completion,
+popular categories, instructor performance) with real date filtering.
+Dashboards in all four portals are wired to it. See `docs/API.md`.
+
+**Blog** — posts are managed in the Academy Admin (`/admin/blog.php`) and
+rendered from the `blog_posts` table on the public site.
+
+**Email architecture** — notifications that need email are inserted into
+the `email_queue` table by `queue_email()` helpers for asynchronous
+delivery by a mail worker; nothing is marked sent from the request path.
 
 **SaaS billing** — Free / Starter / Professional / Business / Enterprise
 plans, monthly + yearly cycles, free trials, coupons (percent/fixed,
@@ -66,6 +89,14 @@ cp .env.example .env   # set DB_HOST, DB_NAME, DB_USER, DB_PASS, APP_URL
 #    Option B (CLI):     php install.php
 #    Option C (manual):  mysql -u root -p -e "CREATE DATABASE lurni_academy;"
 #                        mysql -u root -p lurni_academy < database.sql
+#
+#    Existing installs from the original 39-table schema upgrade in place:
+#    apply the numbered, non-destructive migrations in order —
+#      mysql -u root -p lurni_academy < database/migrations/001_fix_schema_drift.sql
+#      mysql -u root -p lurni_academy < database/migrations/002_course_and_assessment_fields.sql
+#      mysql -u root -p lurni_academy < database/migrations/003_learning_engagement.sql
+#      mysql -u root -p lurni_academy < database/migrations/004_commerce_content_notifications.sql
+#    (fresh installs do not need them — database.sql is already the final schema.)
 
 # 3. Make uploads/ and storage/ writable by the web server
 chmod -R 775 uploads storage
@@ -98,14 +129,18 @@ super-admin/                              Platform owner console
 admin/                                    Academy (tenant) admin console
 instructor/                               Instructor portal
 student/                                Student portal
-api/                                      enroll, progress, quiz-submit, search endpoints
+api/                                      enroll, purchase, progress, quiz-submit,
+                                          search, analytics, bookmarks, notes,
+                                          discussion endpoints
 includes/                               auth, functions, layouts, messenger
 config/                                 config.php (.env loader), database.php (PDO)
 assets/                                 CSS, JS, SVG imagery
 uploads/, storage/                      User uploads, logs, backups
 docs/                                   SECURITY.md, API.md, DEPLOYMENT.md
 vercel-demo/                            Static showcase demo for Vercel
-database.sql                            Full schema (39 tables) + demo seeds
+database.sql                            Full schema (47 tables) + demo seeds
+database/migrations/                    Numbered upgrades for existing installs
+verify-certificate.php                  Public certificate verification page
 ```
 
 ## Deployment

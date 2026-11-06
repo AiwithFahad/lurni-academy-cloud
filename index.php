@@ -13,7 +13,7 @@ try {
         (SELECT COUNT(*) FROM reviews r WHERE r.course_id=c.id AND r.status='published') AS review_count
         FROM courses c LEFT JOIN categories cat ON cat.id=c.category_id
         LEFT JOIN instructors i ON i.id=c.instructor_id LEFT JOIN users u ON u.id=i.user_id
-        WHERE c.status='published' AND c.is_featured=1 ORDER BY c.rating DESC LIMIT 8")->fetchAll();
+        WHERE c.status='published' AND c.approval_status='approved' AND c.visibility='public' AND c.is_featured=1 ORDER BY c.rating DESC LIMIT 8")->fetchAll();
     $categories = $pdo->query("SELECT c.name, MAX(c.icon) AS icon, MAX(c.color) AS color,
         COUNT(DISTINCT co.id) AS course_count FROM categories c
         LEFT JOIN courses co ON co.category_id=c.id AND co.status='published'

@@ -34,8 +34,53 @@ if ($printId = (int)($_GET['print'] ?? 0)) {
     exit;
 }
 
+if (is_post()) {
+    verify_csrf();
+    $action = post('action');
+    $pid = (int)($_POST['id'] ?? 0);
+    $s = $pdo->prepare('SELECT * FROM payments WHERE id=? AND tenant_id=?');
+    $s->execute([$pid, $tid]); $pay = $s->fetch() ?: null;
+    if ($action === 'verify_course_payment' && $pay && $pay['kind'] === 'course' && $pay['status'] === 'pending') {
+        // Verified confirmation: only now does the payment count as paid and
+        // the student's pending enrollment activate.
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare("UPDATE payments SET status='completed', verified_by=?, verified_at=NOW() WHERE id=?")->execute([$me['id'], $pid]);
+            if ($pay['invoice_id']) $pdo->prepare("UPDATE invoices SET status='paid', paid_at=NOW() WHERE id=? AND tenant_id=?")->execute([(int)$pay['invoice_id'], $tid]);
+            $stu = $pdo->prepare('SELECT id FROM students WHERE user_id=? AND tenant_id=?');
+            $stu->execute([(int)$pay['user_id'], $tid]); $studentId = (int)$stu->fetchColumn();
+            if ($studentId && $pay['course_id']) {
+                $pdo->prepare("UPDATE enrollments SET status='active' WHERE student_id=? AND course_id=? AND tenant_id=? AND status='pending'")
+                    ->execute([$studentId, (int)$pay['course_id'], $tid]);
+            }
+            $pdo->commit();
+            notify_user($pdo, $tid, (int)$pay['user_id'], 'Payment verified — course unlocked', 'Your payment was confirmed and your course is now active. Happy learning!', '/student/my-learning.php');
+            queue_email_to_user($pdo, (int)$pay['user_id'], 'Payment verified — course unlocked', "Hi,\n\nYour payment has been verified and your course is now active.\n\n— " . APP_NAME);
+            audit_log($pdo, 'payment.verify', 'payment', $pid);
+            flash('success', 'Payment verified — the course enrollment is now active.');
+        } catch (Throwable $ex) { $pdo->rollBack(); flash('error', 'Verification failed.'); }
+    } elseif ($action === 'fail_course_payment' && $pay && $pay['kind'] === 'course' && $pay['status'] === 'pending') {
+        $pdo->prepare("UPDATE payments SET status='failed', verified_by=?, verified_at=NOW() WHERE id=?")->execute([$me['id'], $pid]);
+        notify_user($pdo, $tid, (int)$pay['user_id'], 'Payment could not be verified', 'Your course payment could not be confirmed. Please contact your academy for help.', '/student/payments.php');
+        flash('error', 'Payment marked as failed.');
+    } elseif ($action === 'record_refund' && $pay && $pay['status'] === 'completed') {
+        $net = (float)$pay['amount'] - (float)$pay['discount_amount'];
+        $amount = min($net, max(0.01, (float)($_POST['refund_amount'] ?? $net)));
+        $pdo->prepare("INSERT INTO payment_refunds(tenant_id,payment_id,amount,reason,status,processed_by,created_at) VALUES(?,?,?,?,'recorded',?,NOW())")
+            ->execute([$tid, $pid, $amount, post('refund_reason') ?: null, $me['id']]);
+        $pdo->prepare("UPDATE payments SET status='refunded' WHERE id=?")->execute([$pid]);
+        audit_log($pdo, 'payment.refund', 'payment', $pid);
+        notify_user($pdo, $tid, (int)$pay['user_id'], 'Refund recorded', 'A refund of ' . money($amount) . ' has been recorded for your payment.', '/student/payments.php');
+        flash('success', 'Refund of ' . money($amount) . ' recorded.');
+    }
+    redirect('/admin/payments.php');
+}
+
 $pageTitle = 'Payments & Invoices'; $active = 'payments';
-$payments = $pdo->prepare('SELECT * FROM payments WHERE tenant_id=? ORDER BY created_at DESC LIMIT 50');
+$payments = $pdo->prepare("SELECT p.*, u.name AS payer_name, c.title AS course_title,
+    (SELECT COALESCE(SUM(r.amount),0) FROM payment_refunds r WHERE r.payment_id=p.id) AS refunded_total
+    FROM payments p LEFT JOIN users u ON u.id=p.user_id LEFT JOIN courses c ON c.id=p.course_id
+    WHERE p.tenant_id=? ORDER BY p.created_at DESC LIMIT 80");
 $payments->execute([$tid]); $payments = $payments->fetchAll();
 $invoices = $pdo->prepare('SELECT * FROM invoices WHERE tenant_id=? ORDER BY id DESC LIMIT 50');
 $invoices->execute([$tid]); $invoices = $invoices->fetchAll();
@@ -44,15 +89,33 @@ require __DIR__ . '/../includes/header.php';
 <div class="row g-3">
   <div class="col-xl-7"><div class="card"><div class="card-header bg-white fw-bold">Payment history</div>
     <div class="table-responsive"><table class="table table-hover align-middle mb-0">
-      <thead><tr><th>Date</th><th>Amount</th><th>Method / Ref</th><th>Status</th></tr></thead><tbody>
+      <thead><tr><th>Date</th><th>Payer / Item</th><th>Amount</th><th>Method / Ref</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>
       <?php foreach ($payments as $p): ?>
       <tr><td><small><?= e(date('M j, Y', strtotime($p['created_at']))) ?></small></td>
-        <td class="fw-semibold"><?= money((float)$p['amount'] - (float)$p['discount_amount']) ?><?php if ((float)$p['discount_amount'] > 0): ?><br><small class="text-success">coupon <?= e($p['coupon_code'] ?? '') ?> −<?= money($p['discount_amount']) ?></small><?php endif; ?></td>
+        <td><small><strong><?= e($p['payer_name'] ?? '—') ?></strong><br><?= $p['kind'] === 'course' ? e($p['course_title'] ?? 'Course purchase') : 'Subscription' ?></small></td>
+        <td class="fw-semibold"><?= money((float)$p['amount'] - (float)$p['discount_amount']) ?><?php if ((float)$p['discount_amount'] > 0): ?><br><small class="text-success">coupon <?= e($p['coupon_code'] ?? '') ?> −<?= money($p['discount_amount']) ?></small><?php endif; ?><?php if ((float)$p['refunded_total'] > 0): ?><br><small class="text-danger">refunded <?= money((float)$p['refunded_total']) ?></small><?php endif; ?></td>
         <td class="text-capitalize"><small><?= e($p['method']) ?><br><?= e($p['reference'] ?? '') ?></small></td>
         <td><span class="badge bg-<?= match($p['status']) { 'completed' => 'success', 'pending' => 'warning', 'failed' => 'danger', default => 'secondary' } ?>-subtle text-<?= match($p['status']) { 'completed' => 'success', 'pending' => 'warning', 'failed' => 'danger', default => 'secondary' } ?>"><?= e($p['status']) ?></span>
-        <?php if ($p['status'] === 'pending'): ?><br><small class="text-muted">awaiting verification</small><?php endif; ?></td></tr>
+        <?php if ($p['status'] === 'pending'): ?><br><small class="text-muted">awaiting verification</small><?php endif; ?></td>
+        <td class="text-end text-nowrap">
+          <?php if ($p['kind'] === 'course' && $p['status'] === 'pending'): ?>
+          <form method="post" class="d-inline" onsubmit="return confirm('Confirm this payment was received? The course unlocks for the student.')"><?= csrf_field() ?><input type="hidden" name="action" value="verify_course_payment"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button class="btn btn-sm btn-success">Verify</button></form>
+          <form method="post" class="d-inline" onsubmit="return confirm('Mark this payment as failed?')"><?= csrf_field() ?><input type="hidden" name="action" value="fail_course_payment"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button class="btn btn-sm btn-outline-danger">Fail</button></form>
+          <?php endif; ?>
+          <?php if ($p['kind'] === 'course' && $p['status'] === 'completed'): ?>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#refundModal<?= (int)$p['id'] ?>">Refund</button>
+          <div class="modal fade text-start" id="refundModal<?= (int)$p['id'] ?>" tabindex="-1"><div class="modal-dialog"><form method="post" class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Record refund</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body"><?= csrf_field() ?><input type="hidden" name="action" value="record_refund"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
+              <div class="mb-2"><label class="form-label">Amount</label><input class="form-control" type="number" step="0.01" min="0.01" max="<?= (float)$p['amount'] - (float)$p['discount_amount'] ?>" name="refund_amount" value="<?= (float)$p['amount'] - (float)$p['discount_amount'] ?>" required></div>
+              <div class="mb-2"><label class="form-label">Reason</label><input class="form-control" name="refund_reason" placeholder="e.g. Student withdrew within the refund window"></div>
+              <p class="text-muted small mb-0">This records the refund against the payment; process the money return through your payment provider.</p></div>
+            <div class="modal-footer"><button class="btn btn-primary" type="submit">Record refund</button></div>
+          </form></div></div>
+          <?php endif; ?>
+        </td></tr>
       <?php endforeach; ?>
-      <?php if (!$payments): ?><tr><td colspan="4" class="text-center text-muted py-4">No payments yet.</td></tr><?php endif; ?>
+      <?php if (!$payments): ?><tr><td colspan="6" class="text-center text-muted py-4">No payments yet.</td></tr><?php endif; ?>
       </tbody></table></div></div></div>
   <div class="col-xl-5"><div class="card"><div class="card-header bg-white fw-bold">Invoices</div>
     <ul class="list-group list-group-flush">

@@ -213,3 +213,75 @@ function create_invoice(PDO $pdo, int $tenantId, ?int $subscriptionId, ?int $pay
                  $paymentId ? 'paid' : 'unpaid', date('Y-m-d H:i:s'), date('Y-m-d H:i:s', strtotime('+7 days'))]);
     return (int)$pdo->lastInsertId();
 }
+
+/* ---------- Identity shortcuts (upgrade) ---------- */
+/** The students.id for the signed-in student user, or 0 when not a student. */
+function current_student_id(PDO $pdo): int {
+    $u = current_user();
+    if (!$u || ($u['role'] ?? '') !== 'student' || empty($u['tenant_id'])) return 0;
+    static $cache = null;
+    if ($cache !== null) return $cache;
+    $s = $pdo->prepare('SELECT id FROM students WHERE user_id=? AND tenant_id=?');
+    $s->execute([$u['id'], $u['tenant_id']]);
+    return $cache = (int)$s->fetchColumn();
+}
+/** The instructors row for the signed-in instructor user, or null. */
+function current_instructor(PDO $pdo): ?array {
+    $u = current_user();
+    if (!$u || ($u['role'] ?? '') !== 'instructor' || empty($u['tenant_id'])) return null;
+    $s = $pdo->prepare('SELECT * FROM instructors WHERE user_id=? AND tenant_id=?');
+    $s->execute([$u['id'], $u['tenant_id']]);
+    $row = $s->fetch();
+    return $row ?: null;
+}
+
+/* ---------- Email notification architecture (upgrade) ---------- */
+/**
+ * Queue an email for asynchronous delivery by the mail worker / cron sender.
+ * Nothing is "sent" from the request path; rows land in email_queue with
+ * status 'queued' and are flipped to 'sent'/'failed' by the sender.
+ */
+function queue_email(PDO $pdo, ?int $tenantId, string $toEmail, string $subject, string $body): void {
+    if ($toEmail === '' || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) return;
+    try {
+        $s = $pdo->prepare("INSERT INTO email_queue(tenant_id,to_email,subject,body,status,created_at) VALUES(?,?,?,?,'queued',NOW())");
+        $s->execute([$tenantId, $toEmail, $subject, $body]);
+    } catch (Throwable $ignored) {}
+}
+/** Queue an email to a platform user by id (looks up their address). */
+function queue_email_to_user(PDO $pdo, int $userId, string $subject, string $body): void {
+    try {
+        $s = $pdo->prepare('SELECT email, tenant_id FROM users WHERE id=?');
+        $s->execute([$userId]);
+        $row = $s->fetch();
+        if ($row) queue_email($pdo, $row['tenant_id'] !== null ? (int)$row['tenant_id'] : null, (string)$row['email'], $subject, $body);
+    } catch (Throwable $ignored) {}
+}
+
+/* ---------- Coupons (upgrade: shared by subscription + course checkout) ---------- */
+/**
+ * Validate a coupon against an amount. Returns
+ * ['coupon' => row, 'discount' => float] or null when invalid/exhausted/expired.
+ */
+function apply_coupon(PDO $pdo, string $code, float $amount): ?array {
+    $code = strtoupper(trim($code));
+    if ($code === '' || $amount <= 0) return null;
+    $s = $pdo->prepare('SELECT * FROM coupons WHERE code=? AND is_active=1');
+    $s->execute([$code]);
+    $c = $s->fetch();
+    if (!$c) return null;
+    if (!empty($c['expires_at']) && strtotime((string)$c['expires_at']) < time()) return null;
+    if ((int)$c['max_uses'] > 0 && (int)$c['times_used'] >= (int)$c['max_uses']) return null;
+    if ($amount < (float)$c['min_amount']) return null;
+    $discount = $c['discount_type'] === 'percent'
+        ? round($amount * (float)$c['discount_value'] / 100, 2)
+        : min((float)$c['discount_value'], $amount);
+    return ['coupon' => $c, 'discount' => $discount];
+}
+function record_coupon_redemption(PDO $pdo, int $couponId, ?int $userId, ?int $paymentId, float $discount): void {
+    try {
+        $pdo->prepare('INSERT INTO coupon_redemptions(coupon_id,user_id,payment_id,discount_amount,created_at) VALUES(?,?,?,?,NOW())')
+            ->execute([$couponId, $userId, $paymentId, $discount]);
+        $pdo->prepare('UPDATE coupons SET times_used=times_used+1 WHERE id=?')->execute([$couponId]);
+    } catch (Throwable $ignored) {}
+}

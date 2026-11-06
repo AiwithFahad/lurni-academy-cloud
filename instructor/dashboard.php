@@ -55,4 +55,30 @@ require __DIR__ . '/../includes/header.php';
     <?php if (!$pending): ?><li class="list-group-item text-muted">Nothing waiting to be graded. 🎉</li><?php endif; ?>
     </ul></div></div>
 </div>
+<div class="card mt-3"><div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+  <span class="fw-bold"><i class="bi bi-bar-chart-line text-primary"></i> My teaching analytics</span>
+  <span class="d-flex gap-2 align-items-center">
+    <input type="date" class="form-control form-control-sm" data-analytics-from value="<?= date('Y-m-d', strtotime('-11 months')) ?>">
+    <input type="date" class="form-control form-control-sm" data-analytics-to value="<?= date('Y-m-d') ?>">
+    <button class="btn btn-sm btn-primary" data-analytics-refresh>Apply</button>
+  </span></div>
+<div class="card-body">
+  <div class="row g-3 mb-3">
+    <?php foreach ([
+        ['my_courses', 'My courses', false],
+        ['learners', 'Learners', false],
+        ['course_revenue', 'Verified course revenue', true],
+        ['pending_grading', 'Submissions to grade', false],
+        ['quiz_attempts', 'Quiz attempts', false],
+    ] as [$k, $label, $money]): ?>
+    <div class="col-md-4 col-xl-2"><div class="border rounded p-3 text-center h-100">
+      <div class="h4 fw-bold mb-0" data-stat="<?= $k ?>"<?= $money ? ' data-stat-money' : '' ?>>–</div>
+      <div class="small text-muted"><?= $label ?></div></div></div>
+    <?php endforeach; ?>
+  </div>
+  <div class="row g-3">
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Enrollments in my courses</div><div style="height:220px"><canvas id="insEnroll" data-series="enrollments" data-chart-type="line" data-chart-label="Enrollments"></canvas></div></div>
+    <div class="col-xl-6"><div class="fw-semibold mb-2">Learners per course</div><div style="height:220px"><canvas id="insLearners" data-series="learners_by_course" data-chart-type="bar" data-chart-label="Learners"></canvas></div></div>
+  </div>
+</div></div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

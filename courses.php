@@ -8,7 +8,7 @@ $q = getp('q'); $catSlug = getp('category'); $level = getp('level');
 $cats = []; $rows = []; $total = 0;
 try {
     $cats = $pdo->query("SELECT name, slug FROM categories WHERE status='active' GROUP BY name, slug ORDER BY name")->fetchAll();
-    $where = ["c.status='published'"]; $args = [];
+    $where = ["c.status='published'", "c.approval_status='approved'", "c.visibility='public'"]; $args = [];
     if ($q !== '') { $where[] = '(c.title LIKE ? OR c.subtitle LIKE ? OR c.description LIKE ?)'; $args = array_merge($args, ["%$q%", "%$q%", "%$q%"]); }
     if ($catSlug !== '') { $where[] = 'cat.slug=?'; $args[] = $catSlug; }
     if (in_array($level, ['beginner', 'intermediate', 'advanced', 'all_levels'], true)) { $where[] = 'c.level=?'; $args[] = $level; }

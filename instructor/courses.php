@@ -24,25 +24,29 @@ if (is_post()) {
             try { $up = handle_upload($_FILES['thumb_file'], 'thumbs', ['png', 'jpg', 'jpeg', 'svg', 'webp'], 3); if ($up) $thumb = '/' . $up; }
             catch (Throwable $ex) { flash('error', $ex->getMessage()); redirect('/instructor/courses.php'); }
         }
+        $visibility = in_array(post('visibility'), ['public', 'unlisted', 'private'], true) ? post('visibility') : 'public';
         $data = [$tid, $iid, (int)($_POST['category_id'] ?? 0) ?: null, post('title'), slugify(post('title')),
                  post('subtitle'), post('description'), $thumb,
                  in_array(post('level'), ['beginner', 'intermediate', 'advanced', 'all_levels'], true) ? post('level') : 'beginner',
                  (float)($_POST['price'] ?? 0), ($_POST['old_price'] ?? '') === '' ? null : (float)$_POST['old_price'],
                  post('language', 'English'), in_array(post('status'), ['draft', 'published', 'archived'], true) ? post('status') : 'draft',
-                 isset($_POST['is_featured']) ? 1 : 0];
+                 isset($_POST['is_featured']) ? 1 : 0,
+                 post('objectives'), post('requirements'), max(0, (int)($_POST['duration_minutes'] ?? 0)), $visibility];
         if ($id) {
             // Ownership check: instructors may only edit their own courses.
-            $pdo->prepare('UPDATE courses SET category_id=?, title=?, subtitle=?, description=?, thumbnail=?, level=?, price=?, old_price=?, language=?, status=?, is_featured=? WHERE id=? AND tenant_id=? AND instructor_id=?')
-                ->execute([$data[2], $data[3], $data[5], $data[6], $data[7], $data[8], $data[9], $data[10], $data[11], $data[12], $data[13], $id, $tid, $iid]);
+            $pdo->prepare('UPDATE courses SET category_id=?, title=?, subtitle=?, description=?, thumbnail=?, level=?, price=?, old_price=?, language=?, status=?, is_featured=?, objectives=?, requirements=?, duration_minutes=?, visibility=? WHERE id=? AND tenant_id=? AND instructor_id=?')
+                ->execute([$data[2], $data[3], $data[5], $data[6], $data[7], $data[8], $data[9], $data[10], $data[11], $data[12], $data[13], $data[14], $data[15], $data[16], $data[17], $id, $tid, $iid]);
             flash('success', 'Course updated.');
         } else {
             $chk = $pdo->prepare('SELECT COUNT(*) FROM courses WHERE tenant_id=? AND slug=?');
             $chk->execute([$tid, $data[4]]);
             if ((int)$chk->fetchColumn() > 0) $data[4] .= '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-            $pdo->prepare('INSERT INTO courses(tenant_id,instructor_id,category_id,title,slug,subtitle,description,thumbnail,level,price,old_price,language,status,is_featured) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+            // New instructor courses go through academy approval before they
+            // appear in public listings (approval_status='pending').
+            $pdo->prepare("INSERT INTO courses(tenant_id,instructor_id,category_id,title,slug,subtitle,description,thumbnail,level,price,old_price,language,status,is_featured,objectives,requirements,duration_minutes,visibility,approval_status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending')")
                 ->execute($data);
             log_activity($pdo, 'Instructor course created: ' . post('title'));
-            flash('success', 'Course created. Add modules and lessons from the Lessons page.');
+            flash('success', 'Course created and submitted for academy approval. Add modules and lessons from the Lessons page.');
         }
     } elseif ($action === 'delete') {
         $pdo->prepare('DELETE FROM courses WHERE id=? AND tenant_id=? AND instructor_id=?')->execute([(int)($_POST['id'] ?? 0), $tid, $iid]);
@@ -70,7 +74,8 @@ require __DIR__ . '/../includes/header.php';
     <tr><td><img src="<?= e($c['thumbnail'] ?: '/assets/img/course-default.svg') ?>" class="table-thumb" alt=""> <strong><?= e($c['title']) ?></strong><br><small class="text-muted"><?= e($c['category_name'] ?? 'Uncategorized') ?></small></td>
       <td><?= (float)$c['price'] > 0 ? money($c['price']) : 'Free' ?></td><td><?= (int)$c['lesson_count'] ?></td><td><?= (int)$c['learner_count'] ?></td>
       <td><span class="text-warning">★ <?= number_format((float)$c['rating'], 1) ?></span></td>
-      <td><span class="badge bg-<?= $c['status'] === 'published' ? 'success' : 'secondary' ?>-subtle text-<?= $c['status'] === 'published' ? 'success' : 'secondary' ?>"><?= e($c['status']) ?></span></td>
+      <td><span class="badge bg-<?= $c['status'] === 'published' ? 'success' : 'secondary' ?>-subtle text-<?= $c['status'] === 'published' ? 'success' : 'secondary' ?>"><?= e($c['status']) ?></span>
+        <span class="badge bg-<?= ($c['approval_status'] ?? 'approved') === 'approved' ? 'primary' : (($c['approval_status'] ?? '') === 'pending' ? 'warning text-dark' : 'danger') ?>-subtle text-<?= ($c['approval_status'] ?? 'approved') === 'approved' ? 'primary' : (($c['approval_status'] ?? '') === 'pending' ? 'warning-emphasis' : 'danger') ?>"><?= e($c['approval_status'] ?? 'approved') ?></span></td>
       <td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-secondary" href="/instructor/lessons.php?course_id=<?= (int)$c['id'] ?>">Content</a>
         <a class="btn btn-sm btn-outline-primary" href="?edit=<?= (int)$c['id'] ?>">Edit</a>
         <form method="post" class="d-inline" onsubmit="return confirm('Delete this course and its content?')"><?= csrf_field() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$c['id'] ?>"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td></tr>
@@ -89,6 +94,12 @@ require __DIR__ . '/../includes/header.php';
         <div class="col-4 mb-2"><label class="form-label">Price $</label><input class="form-control" type="number" step="0.01" min="0" name="price" value="<?= e($edit['price'] ?? '0') ?>"></div>
         <div class="col-4 mb-2"><label class="form-label">Old price $</label><input class="form-control" type="number" step="0.01" min="0" name="old_price" value="<?= e($edit['old_price'] ?? '') ?>"></div>
         <div class="col-4 mb-2"><label class="form-label">Status</label><select class="form-select" name="status"><?php foreach (['draft', 'published', 'archived'] as $st): ?><option value="<?= $st ?>" <?= ($edit['status'] ?? 'draft') === $st ? 'selected' : '' ?>><?= ucfirst($st) ?></option><?php endforeach; ?></select></div>
+      </div>
+      <div class="mb-2"><label class="form-label">What students will learn (objectives)</label><textarea class="form-control" name="objectives" rows="2" placeholder="One objective per line"><?= e($edit['objectives'] ?? '') ?></textarea></div>
+      <div class="mb-2"><label class="form-label">Requirements</label><textarea class="form-control" name="requirements" rows="2" placeholder="One requirement per line"><?= e($edit['requirements'] ?? '') ?></textarea></div>
+      <div class="row g-2">
+        <div class="col-6 mb-2"><label class="form-label">Duration (min)</label><input class="form-control" type="number" min="0" name="duration_minutes" value="<?= e($edit['duration_minutes'] ?? '0') ?>"></div>
+        <div class="col-6 mb-2"><label class="form-label">Visibility</label><select class="form-select" name="visibility"><?php foreach (['public' => 'Public', 'unlisted' => 'Unlisted', 'private' => 'Private'] as $v => $l): ?><option value="<?= $v ?>" <?= ($edit['visibility'] ?? 'public') === $v ? 'selected' : '' ?>><?= $l ?></option><?php endforeach; ?></select></div>
       </div>
       <div class="mb-2"><label class="form-label">Thumbnail</label>
         <select class="form-select mb-1" name="thumbnail"><?php foreach ($thumbPresets as $tp): ?><option value="<?= $tp ?>" <?= ($edit['thumbnail'] ?? '') === $tp ? 'selected' : '' ?>><?= basename($tp) ?></option><?php endforeach; ?></select>

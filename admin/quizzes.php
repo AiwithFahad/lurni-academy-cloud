@@ -13,14 +13,14 @@ if (is_post()) {
     if ($action === 'save') {
         $id = (int)($_POST['id'] ?? 0);
         $data = [$tid, (int)($_POST['course_id'] ?? 0), post('title'), post('description'),
-                 max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0),
+                 max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0), max(0, (int)($_POST['max_attempts'] ?? 0)),
                  post('status') === 'draft' ? 'draft' : 'published', $me['id']];
         if ($id) {
-            $pdo->prepare('UPDATE quizzes SET course_id=?, title=?, description=?, pass_percent=?, time_limit_minutes=?, status=? WHERE id=? AND tenant_id=?')
-                ->execute([$data[1], $data[2], $data[3], $data[4], $data[5], $data[6], $id, $tid]);
+            $pdo->prepare('UPDATE quizzes SET course_id=?, title=?, description=?, pass_percent=?, time_limit_minutes=?, max_attempts=?, status=? WHERE id=? AND tenant_id=?')
+                ->execute([$data[1], $data[2], $data[3], $data[4], $data[5], $data[6], $data[7], $id, $tid]);
             flash('success', 'Quiz updated.');
         } else {
-            $pdo->prepare('INSERT INTO quizzes(tenant_id,course_id,title,description,pass_percent,time_limit_minutes,status,created_by) VALUES(?,?,?,?,?,?,?,?)')->execute($data);
+            $pdo->prepare('INSERT INTO quizzes(tenant_id,course_id,title,description,pass_percent,time_limit_minutes,max_attempts,status,created_by) VALUES(?,?,?,?,?,?,?,?,?)')->execute($data);
             flash('success', 'Quiz created. Add questions from the Question Banks page.');
         }
     } elseif ($action === 'delete') {
@@ -63,7 +63,8 @@ require __DIR__ . '/../includes/header.php';
       <div class="mb-2"><label class="form-label">Description</label><input class="form-control" name="description" value="<?= e($edit['description'] ?? '') ?>"></div>
       <div class="row g-2">
         <div class="col-6 mb-2"><label class="form-label">Pass %</label><input class="form-control" type="number" min="1" max="100" name="pass_percent" value="<?= e($edit['pass_percent'] ?? '70') ?>"></div>
-        <div class="col-6 mb-2"><label class="form-label">Time limit (min, 0=none)</label><input class="form-control" type="number" min="0" name="time_limit_minutes" value="<?= e($edit['time_limit_minutes'] ?? '0') ?>"></div>
+        <div class="col-4 mb-2"><label class="form-label">Time limit (min, 0=none)</label><input class="form-control" type="number" min="0" name="time_limit_minutes" value="<?= e($edit['time_limit_minutes'] ?? '0') ?>"></div>
+        <div class="col-4 mb-2"><label class="form-label">Max attempts (0=∞)</label><input class="form-control" type="number" min="0" name="max_attempts" value="<?= e($edit['max_attempts'] ?? '0') ?>"></div>
       </div>
       <div class="mb-3"><label class="form-label">Status</label><select class="form-select" name="status"><option value="published" <?= ($edit['status'] ?? 'published') === 'published' ? 'selected' : '' ?>>Published</option><option value="draft" <?= ($edit['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Draft</option></select></div>
       <button class="btn btn-primary w-100"><?= $edit ? 'Update quiz' : 'Create quiz' ?></button>

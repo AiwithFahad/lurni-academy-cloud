@@ -1,9 +1,44 @@
 <?php
 declare(strict_types=1);
-$pageTitle = 'How Demo Academy reached 1,000 learners in 90 days';
+require_once __DIR__ . '/includes/functions.php';
+// Article page — reads the requested post from blog_posts (by ?slug=);
+// with no slug it shows the latest published post. The original static
+// article remains as the fallback when the table has no published posts.
+$post = null;
+try {
+    $pdo = db();
+    $slug = trim((string)($_GET['slug'] ?? ''));
+    if ($slug !== '') {
+        $s = $pdo->prepare("SELECT bp.*, u.name AS author_name FROM blog_posts bp LEFT JOIN users u ON u.id=bp.author_id WHERE bp.slug=? AND bp.status='published' LIMIT 1");
+        $s->execute([$slug]); $post = $s->fetch() ?: null;
+        if (!$post) { http_response_code(404); }
+    } else {
+        $s = $pdo->query("SELECT bp.*, u.name AS author_name FROM blog_posts bp LEFT JOIN users u ON u.id=bp.author_id WHERE bp.status='published' ORDER BY bp.published_at DESC, bp.id DESC LIMIT 1");
+        $post = $s->fetch() ?: null;
+    }
+} catch (Throwable $ignored) { $post = null; }
+$pageTitle = $post ? (string)$post['title'] : 'How Demo Academy reached 1,000 learners in 90 days';
 $sitePage = 'blog';
 require_once __DIR__ . '/includes/site-header.php';
 ?>
+<?php if ($post): ?>
+<section class="section-pad"><div class="container" style="max-width:780px">
+  <span class="badge bg-primary-subtle text-primary"><?= e($post['category'] ?? 'General') ?></span>
+  <h1 class="mt-3"><?= e($post['title']) ?></h1>
+  <p class="text-muted"><i class="bi bi-calendar3"></i> <?= $post['published_at'] ? e(date('M j, Y', strtotime((string)$post['published_at']))) : '' ?> · <i class="bi bi-clock"></i> <?= max(1, (int)ceil(str_word_count(strip_tags((string)$post['content'])) / 200)) ?> min read · By <?= e($post['author_name'] ?? 'the Lurni team') ?></p>
+  <?php if ($post['cover_image']): ?><img src="<?= e($post['cover_image']) ?>" alt="" class="img-fluid rounded-4 my-4"><?php endif; ?>
+  <div class="article-body">
+    <?php foreach (preg_split('/\r\n\r\n|\n\n/', trim((string)$post['content'])) as $para): if (trim($para) === '') continue; ?>
+    <p><?= nl2br(e($para)) ?></p>
+    <?php endforeach; ?>
+  </div>
+  <hr class="my-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <a class="btn btn-outline-primary" href="/blog.php"><i class="bi bi-arrow-left"></i> All articles</a>
+    <a class="btn btn-gradient" href="/auth/register.php">Start your academy</a>
+  </div>
+</div></section>
+<?php else: ?>
 <section class="section-pad"><div class="container" style="max-width:780px">
   <span class="badge bg-primary-subtle text-primary">Growth</span>
   <h1 class="mt-3">How Demo Academy reached 1,000 learners in 90 days</h1>
@@ -26,4 +61,5 @@ require_once __DIR__ . '/includes/site-header.php';
     <a class="btn btn-gradient" href="/auth/register.php">Start your academy</a>
   </div>
 </div></section>
+<?php endif; ?>
 <?php require_once __DIR__ . '/includes/site-footer.php'; ?>

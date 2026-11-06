@@ -31,12 +31,12 @@ if (is_post()) {
         $own->execute([$cid, $tid, $iid]);
         if ((int)$own->fetchColumn() === 0) { flash('error', 'Choose one of your own courses.'); redirect('/instructor/quizzes.php'); }
         if ($id && own_quiz($pdo, $tid, $iid, $id)) {
-            $pdo->prepare('UPDATE quizzes SET course_id=?, title=?, description=?, pass_percent=?, time_limit_minutes=?, status=? WHERE id=? AND tenant_id=?')
-                ->execute([$cid, post('title'), post('description'), max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0), post('status') === 'draft' ? 'draft' : 'published', $id, $tid]);
+            $pdo->prepare('UPDATE quizzes SET course_id=?, title=?, description=?, pass_percent=?, time_limit_minutes=?, max_attempts=?, status=? WHERE id=? AND tenant_id=?')
+                ->execute([$cid, post('title'), post('description'), max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0), max(0, (int)($_POST['max_attempts'] ?? 0)), post('status') === 'draft' ? 'draft' : 'published', $id, $tid]);
             flash('success', 'Quiz updated.');
         } elseif (!$id) {
-            $pdo->prepare('INSERT INTO quizzes(tenant_id,course_id,title,description,pass_percent,time_limit_minutes,status,created_by) VALUES(?,?,?,?,?,?,?,?)')
-                ->execute([$tid, $cid, post('title'), post('description'), max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0), post('status') === 'draft' ? 'draft' : 'published', $me['id']]);
+            $pdo->prepare('INSERT INTO quizzes(tenant_id,course_id,title,description,pass_percent,time_limit_minutes,max_attempts,status,created_by) VALUES(?,?,?,?,?,?,?,?,?)')
+                ->execute([$tid, $cid, post('title'), post('description'), max(1, min(100, (int)($_POST['pass_percent'] ?? 70))), (int)($_POST['time_limit_minutes'] ?? 0), max(0, (int)($_POST['max_attempts'] ?? 0)), post('status') === 'draft' ? 'draft' : 'published', $me['id']]);
             flash('success', 'Quiz created. Now add questions below.');
         }
     } elseif ($action === 'quiz_delete') {
@@ -45,16 +45,35 @@ if (is_post()) {
     } elseif ($action === 'question_save') {
         $quizId = (int)($_POST['quiz_id'] ?? 0);
         if (own_quiz($pdo, $tid, $iid, $quizId)) {
+            $qtype = in_array(post('qtype'), ['single', 'multiple', 'true_false'], true) ? post('qtype') : 'single';
             $pdo->prepare('INSERT INTO questions(tenant_id,quiz_id,question,type,points,sort_order) VALUES(?,?,?,?,?,?)')
-                ->execute([$tid, $quizId, post('question'), 'single', max(1, (int)($_POST['points'] ?? 1)), 0]);
+                ->execute([$tid, $quizId, post('question'), $qtype, max(1, (int)($_POST['points'] ?? 1)), 0]);
             $qid = (int)$pdo->lastInsertId();
-            $correct = (int)($_POST['correct'] ?? 0);
-            foreach (($_POST['options'] ?? []) as $i => $opt) {
-                $opt = trim((string)$opt);
-                if ($opt === '') continue;
-                $pdo->prepare('INSERT INTO answers(question_id,answer_text,is_correct) VALUES(?,?,?)')->execute([$qid, $opt, $i === $correct ? 1 : 0]);
+            if ($qtype === 'true_false') {
+                $correct = post('tf_correct') === 'false' ? 1 : 0; // options: True, False
+                foreach (['True', 'False'] as $i => $opt) {
+                    $pdo->prepare('INSERT INTO answers(question_id,answer_text,is_correct) VALUES(?,?,?)')->execute([$qid, $opt, $i === $correct ? 1 : 0]);
+                }
+            } else {
+                // single: 'correct' holds one index; multiple: 'correct_multi[]' holds several.
+                $correctSet = $qtype === 'multiple'
+                    ? array_map('intval', (array)($_POST['correct_multi'] ?? []))
+                    : [(int)($_POST['correct'] ?? 0)];
+                foreach (($_POST['options'] ?? []) as $i => $opt) {
+                    $opt = trim((string)$opt);
+                    if ($opt === '') continue;
+                    $pdo->prepare('INSERT INTO answers(question_id,answer_text,is_correct) VALUES(?,?,?)')->execute([$qid, $opt, in_array($i, $correctSet, true) ? 1 : 0]);
+                }
             }
             flash('success', 'Question added.');
+        }
+    } elseif ($action === 'attempt_feedback') {
+        $attemptId = (int)($_POST['attempt_id'] ?? 0);
+        $s = $pdo->prepare('SELECT qa.id FROM quiz_attempts qa JOIN quizzes qz ON qz.id=qa.quiz_id JOIN courses c ON c.id=qz.course_id WHERE qa.id=? AND qa.tenant_id=? AND c.instructor_id=?');
+        $s->execute([$attemptId, $tid, $iid]);
+        if ($s->fetch()) {
+            $pdo->prepare('UPDATE quiz_attempts SET feedback=?, feedback_by=? WHERE id=? AND tenant_id=?')->execute([post('feedback'), $me['id'], $attemptId, $tid]);
+            flash('success', 'Feedback saved — the student can see it on their quiz result.');
         }
     } elseif ($action === 'question_delete') {
         $qid = (int)($_POST['id'] ?? 0);
@@ -114,8 +133,9 @@ require __DIR__ . '/../includes/header.php';
           <?php foreach ($courses as $c): ?><option value="<?= (int)$c['id'] ?>" <?= (int)($edit['course_id'] ?? 0) === (int)$c['id'] ? 'selected' : '' ?>><?= e($c['title']) ?></option><?php endforeach; ?></select></div>
         <div class="mb-2"><label class="form-label">Description</label><input class="form-control" name="description" value="<?= e($edit['description'] ?? '') ?>"></div>
         <div class="row g-2">
-          <div class="col-6 mb-2"><label class="form-label">Pass %</label><input class="form-control" type="number" min="1" max="100" name="pass_percent" value="<?= e($edit['pass_percent'] ?? '70') ?>"></div>
-          <div class="col-6 mb-2"><label class="form-label">Time limit (min)</label><input class="form-control" type="number" min="0" name="time_limit_minutes" value="<?= e($edit['time_limit_minutes'] ?? '0') ?>"></div>
+          <div class="col-4 mb-2"><label class="form-label">Pass %</label><input class="form-control" type="number" min="1" max="100" name="pass_percent" value="<?= e($edit['pass_percent'] ?? '70') ?>"></div>
+          <div class="col-4 mb-2"><label class="form-label">Time limit (min)</label><input class="form-control" type="number" min="0" name="time_limit_minutes" value="<?= e($edit['time_limit_minutes'] ?? '0') ?>"></div>
+          <div class="col-4 mb-2"><label class="form-label">Max attempts (0 = ∞)</label><input class="form-control" type="number" min="0" name="max_attempts" value="<?= e($edit['max_attempts'] ?? '0') ?>"></div>
         </div>
         <div class="mb-3"><label class="form-label">Status</label><select class="form-select" name="status"><option value="published" <?= ($edit['status'] ?? 'published') === 'published' ? 'selected' : '' ?>>Published</option><option value="draft" <?= ($edit['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Draft</option></select></div>
         <button class="btn btn-primary w-100"><?= $edit ? 'Update quiz' : 'Create quiz' ?></button>
@@ -125,14 +145,44 @@ require __DIR__ . '/../includes/header.php';
     <div class="card"><div class="card-header bg-white fw-bold">Add question</div><div class="card-body">
       <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="question_save"><input type="hidden" name="quiz_id" value="<?= $quizId ?>">
         <div class="mb-2"><label class="form-label">Question</label><textarea class="form-control" name="question" rows="2" required></textarea></div>
-        <div class="mb-2"><label class="form-label">Points</label><input class="form-control" type="number" min="1" name="points" value="1"></div>
-        <label class="form-label">Options — select the correct one</label>
-        <?php for ($i = 0; $i < 4; $i++): ?>
-        <div class="input-group mb-2"><span class="input-group-text"><input class="form-check-input mt-0" type="radio" name="correct" value="<?= $i ?>" <?= $i === 0 ? 'checked' : '' ?> aria-label="Correct option"></span>
-        <input class="form-control" name="options[]" placeholder="Option <?= $i + 1 ?>"></div>
-        <?php endfor; ?>
+        <div class="row g-2">
+          <div class="col-6 mb-2"><label class="form-label">Type</label><select class="form-select js-question-type" name="qtype">
+            <option value="single">Multiple choice (one answer)</option><option value="multiple">Multiple answers</option><option value="true_false">True / False</option></select></div>
+          <div class="col-6 mb-2"><label class="form-label">Points</label><input class="form-control" type="number" min="1" name="points" value="1"></div>
+        </div>
+        <div class="js-options-block">
+          <label class="form-label">Options — mark the correct answer(s)</label>
+          <?php for ($i = 0; $i < 4; $i++): ?>
+          <div class="input-group mb-2"><span class="input-group-text"><input class="form-check-input mt-0 js-correct-single" type="radio" name="correct" value="<?= $i ?>" <?= $i === 0 ? 'checked' : '' ?> aria-label="Correct option"><input class="form-check-input mt-0 js-correct-multi d-none" type="checkbox" name="correct_multi[]" value="<?= $i ?>" aria-label="Correct option"></span>
+          <input class="form-control" name="options[]" placeholder="Option <?= $i + 1 ?>"></div>
+          <?php endfor; ?>
+        </div>
+        <div class="js-tf-block d-none mb-2"><label class="form-label">Correct answer</label>
+          <select class="form-select" name="tf_correct"><option value="true">True</option><option value="false">False</option></select></div>
         <button class="btn btn-outline-primary w-100">Add question</button>
       </form></div></div>
+    <?php endif; ?>
+    <?php if ($quizId): ?>
+    <?php
+      $s = $pdo->prepare("SELECT qa.*, u.name AS student_name FROM quiz_attempts qa
+        JOIN students st ON st.id=qa.student_id JOIN users u ON u.id=st.user_id
+        WHERE qa.quiz_id=? AND qa.tenant_id=? ORDER BY qa.submitted_at DESC LIMIT 15");
+      $s->execute([$quizId, $tid]); $quizAttempts = $s->fetchAll();
+    ?>
+    <div class="card mt-3"><div class="card-header bg-white fw-bold">Recent attempts &amp; feedback</div>
+      <ul class="list-group list-group-flush">
+      <?php foreach ($quizAttempts as $a): ?>
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between"><strong><?= e($a['student_name']) ?></strong>
+          <span class="badge bg-<?= (int)$a['passed'] ? 'success' : 'danger' ?>-subtle text-<?= (int)$a['passed'] ? 'success' : 'danger' ?>"><?= number_format((float)$a['percent'], 0) ?>%</span></div>
+          <small class="text-muted"><?= e($a['submitted_at'] ?? '') ?></small>
+          <form method="post" class="mt-2 d-flex gap-2"><?= csrf_field() ?><input type="hidden" name="action" value="attempt_feedback"><input type="hidden" name="attempt_id" value="<?= (int)$a['id'] ?>">
+            <input class="form-control form-control-sm" name="feedback" placeholder="Feedback for this attempt…" value="<?= e($a['feedback'] ?? '') ?>">
+            <button class="btn btn-sm btn-outline-primary">Save</button></form>
+        </li>
+      <?php endforeach; ?>
+      <?php if (!$quizAttempts): ?><li class="list-group-item text-muted">No attempts yet.</li><?php endif; ?>
+      </ul></div>
     <?php endif; ?>
   </div>
 </div>
